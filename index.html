@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Late for Viva: CS B.Tech Runner</title>
+    <!-- Retro Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="cabinet-container">
+        <!-- Retro Header -->
+        <header class="cabinet-header">
+            <h1 class="glitch-text" data-text="LATE FOR VIVA">LATE FOR VIVA</h1>
+            <div class="subtitle">CS B.TECH RUNNER (V1.0)</div>
+        </header>
+
+        <!-- CRT Monitor Container -->
+        <div class="crt-screen">
+            <div class="scanlines"></div>
+            <div class="flicker"></div>
+            <div class="screen-glare"></div>
+
+            <!-- Game HUD (Overlay on top of canvas) -->
+            <div id="hud" class="hud-container hidden">
+                <div class="hud-item attendance-container">
+                    <span class="hud-label">ATTENDANCE:</span>
+                    <div class="attendance-bar-wrapper">
+                        <div id="attendance-fill" class="attendance-fill safe">100%</div>
+                    </div>
+                </div>
+                <div class="hud-stats">
+                    <div class="hud-item">
+                        <span class="hud-label">COMMITS:</span>
+                        <span id="commits-val" class="hud-value neon-green">0</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">DISTANCE:</span>
+                        <span id="distance-val" class="hud-value neon-yellow">0m</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Element -->
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+            <!-- Screens/Overlay Menus -->
+            <!-- Start/Menu Screen -->
+            <div id="menu-screen" class="screen-overlay">
+                <h2 class="menu-title pulsating">PRESS SPACE TO START</h2>
+                <p class="menu-desc">Vardhan woke up at 8:45 AM! DAA Lab Viva starts at 9:00 AM. Run to college before Sharma Sir debars you!</p>
+                <div class="controls-guide">
+                    <div class="guide-item">
+                        <span class="key">Space / Up / W</span>
+                        <span class="action">Jump (Double Jump supported)</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="key">Down / S</span>
+                        <span class="action">Slide / Duck (Avoid bugs)</span>
+                    </div>
+                </div>
+                <div class="story-teaser">
+                    <span class="story-tag">GOAL:</span> Maintain <strong class="neon-pink">&gt;75% Attendance</strong>. Escape Gully Dogs, Autos, Cows, and Sharma Sir!
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="screen-overlay hidden">
+                <h2 class="gameover-title glitch-text" data-text="DEBARRED!">DEBARRED!</h2>
+                <div class="sharma-remark-box">
+                    <span class="sharma-avatar">👨‍🏫</span>
+                    <p id="sharma-remark">"Your attendance is short! Write Heap Sort code on paper 100 times!"</p>
+                </div>
+                <div class="gameover-stats">
+                    <div class="stat-row">
+                        <span>DISTANCE RUN:</span>
+                        <span id="final-distance" class="neon-yellow">0m</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>GITHUB COMMITS:</span>
+                        <span id="final-commits" class="neon-green">0</span>
+                    </div>
+                    <div class="stat-row highlight-row">
+                        <span>HIGH SCORE:</span>
+                        <span id="high-score" class="neon-pink">0m</span>
+                    </div>
+                </div>
+                <h3 class="pulsating restart-prompt">PRESS SPACE TO TRY AGAIN</h3>
+            </div>
+
+            <!-- Level Passed Screen (Win Screen) -->
+            <div id="win-screen" class="screen-overlay hidden">
+                <h2 id="win-title" class="gameover-title neon-green glitch-text" data-text="LEVEL 1 PASSED!">LEVEL 1 PASSED!</h2>
+                <div id="win-celebration" class="win-celebration-row hidden">🎉 🎊 🏆 🎓 🎉 🎊 🏆 🎓 🎉</div>
+                <div class="sharma-remark-box">
+                    <span class="sharma-avatar">👨‍🏫</span>
+                    <p id="win-message">"Outstanding! You arrived on time and wrote the Heap Sort code perfectly. A+ in DAA Viva!"</p>
+                </div>
+                <p id="win-subtitle" class="win-subtitle">🏃 Made it out of the streets!</p>
+                <div class="gameover-stats">
+                    <div class="stat-row">
+                        <span>DISTANCE RUN:</span>
+                        <span class="neon-yellow">1000m (1.0 km)</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>GITHUB COMMITS:</span>
+                        <span id="win-commits" class="neon-green">0</span>
+                    </div>
+                    <div class="stat-row highlight-row">
+                        <span>ATTENDANCE RECORD:</span>
+                        <span id="win-attendance" class="neon-blue">0%</span>
+                    </div>
+                </div>
+                <h3 class="pulsating restart-prompt">PRESS SPACE TO PLAY AGAIN</h3>
+                <button id="next-level-btn" class="next-level-button" onclick="startLevel2()">▶ NEXT LEVEL: COLLEGE CAMPUS</button>
+            </div>
+
+            <!-- Paused Screen -->
+            <div id="pause-screen" class="screen-overlay hidden">
+                <h2 class="menu-title">PAUSED</h2>
+                <p class="menu-desc">Press ESC to Resume</p>
+            </div>
+
+            <!-- Phone Notification Popup (500m milestones) -->
+            <div id="notif-popup" class="notif-popup hidden">
+                <div class="notif-phone">
+                    <div class="notif-header">
+                        <span class="notif-app-icon">💬</span>
+                        <span class="notif-app-name">WhatsApp</span>
+                        <span class="notif-time">now</span>
+                    </div>
+                    <div class="notif-sender">Saketh 🤙</div>
+                    <div id="notif-message" class="notif-message">bro where are you!! its college time!!</div>
+                    <div class="notif-tap">Tap to dismiss</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cabinet Controls (For Aesthetics and Audio Toggles) -->
+        <footer class="cabinet-footer">
+            <div class="audio-control-panel">
+                <button id="sound-btn" class="cabinet-btn green-btn">MUTED</button>
+                <span class="btn-label">BGM & SFX</span>
+            </div>
+            <div class="coin-slot">
+                <div class="insert-coin">INSERT COIN</div>
+                <div class="coin-light"></div>
+            </div>
+            <div class="branding">
+                <span>SEMESTER 6</span>
+                <span class="led-dot active"></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Core Game Code -->
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,762 @@
+/* -------------------------------------------------------------
+   LATE FOR VIVA: CS B.TECH RUNNER - CSS STYLESHEET
+   Light-Theme Classic Retro Arcade Cabinet Aesthetic (NES/Game Boy Style)
+   ------------------------------------------------------------- */
+
+/* Theme Colors - Light, Clean, Low-Contrast Retro */
+:root {
+    --bg-color: #e5e9f0;           /* Soft desk gray */
+    --cabinet-border: #8892b0;     /* Bezel grey */
+    --cabinet-bg: #eceff4;         /* Retro cream-grey plastic console */
+    --screen-bg: #7ac2f0;          /* Sky blue screen clear color */
+    --neon-green: #2e7d32;         /* Safe green */
+    --neon-pink: #d81b60;          /* Danger pink/red */
+    --neon-blue: #0288d1;          /* Score blue */
+    --neon-yellow: #f57f17;        /* Warning gold */
+    --glass-glow: rgba(2, 136, 209, 0.05);
+}
+
+/* Global Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: 
+        radial-gradient(circle at 50% 50%, #f3f5f8 0%, #d8dee9 100%),
+        linear-gradient(rgba(0, 0, 0, 0.02) 50%, rgba(0, 0, 0, 0.05) 50%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.02), rgba(255, 255, 255, 0.1));
+    background-size: 100% 100%, 100% 4px, 6px 100%;
+    color: #2e3440;
+    font-family: 'Press Start 2P', monospace;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Cabinet Frame Wrapper */
+.cabinet-container {
+    width: 860px;
+    background: var(--cabinet-bg);
+    border: 10px solid var(--cabinet-border);
+    border-radius: 20px;
+    box-shadow: 
+        0 0 0 4px #b8bfca,
+        0 15px 35px rgba(0, 0, 0, 0.15),
+        inset 0 0 30px rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+    color: #3b4252;
+}
+
+/* Cabinet Header */
+.cabinet-header {
+    text-align: center;
+    margin-bottom: 15px;
+    border-bottom: 4px double var(--neon-pink);
+    padding-bottom: 10px;
+}
+
+.cabinet-header h1 {
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--neon-blue);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cabinet-header .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: var(--neon-pink);
+    margin-top: 5px;
+    letter-spacing: 4px;
+    font-weight: bold;
+}
+
+/* CRT Screen Wrapper */
+.crt-screen {
+    position: relative;
+    background: var(--screen-bg);
+    border: 12px solid #3b4252;
+    border-radius: 10px;
+    box-shadow: 
+        inset 0 0 40px rgba(0, 0, 0, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    width: 800px;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CRT Scanlines Overlay */
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.08) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* CRT Glare & Flicker */
+.screen-glare {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 65%);
+    pointer-events: none;
+    z-index: 11;
+}
+
+@keyframes crt-flicker {
+    0% { opacity: 0.99; }
+    50% { opacity: 0.985; }
+    100% { opacity: 1; }
+}
+
+.flicker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 16, 16, 0.01);
+    opacity: 0.1;
+    z-index: 12;
+    pointer-events: none;
+    animation: crt-flicker 0.2s infinite;
+}
+
+/* Canvas styling */
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Dynamic HUD Overlay */
+.hud-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hud-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--cabinet-border);
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: #2e3440;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
+}
+
+.hud-label {
+    font-size: 8px;
+    color: #4c566a;
+    margin-right: 5px;
+}
+
+.hud-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.attendance-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attendance-bar-wrapper {
+    width: 180px;
+    height: 16px;
+    background: #e5e9f0;
+    border: 2px solid #d8dee9;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.attendance-fill {
+    height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.1s linear, background-color 0.3s ease;
+    width: 74.8%;
+}
+
+.attendance-fill.danger {
+    background: var(--neon-pink);
+    animation: danger-pulse 1s infinite alternate;
+}
+
+.attendance-fill.warning {
+    background: var(--neon-yellow);
+    color: #fff;
+}
+
+.attendance-fill.safe {
+    background: var(--neon-green);
+}
+
+@keyframes danger-pulse {
+    0% { background: #b00f4f; }
+    100% { background: var(--neon-pink); }
+}
+
+.hud-stats {
+    display: flex;
+    gap: 10px;
+}
+
+/* Colors for stats */
+.neon-green { color: var(--neon-green); font-weight: bold; }
+.neon-pink { color: var(--neon-pink); font-weight: bold; }
+.neon-yellow { color: var(--neon-yellow); font-weight: bold; }
+.neon-blue { color: var(--neon-blue); font-weight: bold; }
+
+/* Overlays / Screens - Made Clean Light White/Grey */
+.screen-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #2e3440;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.05);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Titles */
+.menu-title {
+    font-size: 18px;
+    color: var(--neon-pink);
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.pulsating {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; transform: scale(0.98); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.7; transform: scale(0.98); }
+}
+
+.menu-desc {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4c566a;
+    max-width: 550px;
+    margin-bottom: 25px;
+}
+
+/* Keyboard controls layout */
+.controls-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #eceff4;
+    border: 2px dashed var(--neon-blue);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    width: 480px;
+}
+
+.guide-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9px;
+}
+
+.key {
+    background: #fff;
+    color: #2e3440;
+    padding: 4px 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 0 #b8bfca;
+    border: 1px solid #d8dee9;
+    font-weight: bold;
+}
+
+.action {
+    color: var(--neon-green);
+    font-weight: bold;
+}
+
+.story-teaser {
+    font-size: 8px;
+    color: #4c566a;
+    line-height: 1.8;
+}
+
+.story-tag {
+    color: var(--neon-pink);
+    font-weight: bold;
+}
+
+/* Game Over / Win Screens */
+.gameover-title {
+    font-size: 32px;
+    color: var(--neon-pink);
+    margin-bottom: 15px;
+    letter-spacing: 4px;
+    font-weight: bold;
+}
+
+.sharma-remark-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #eceff4;
+    border: 2px solid #d8dee9;
+    padding: 12px;
+    border-radius: 6px;
+    max-width: 550px;
+    margin-bottom: 20px;
+}
+
+.sharma-avatar {
+    font-size: 32px;
+}
+
+#sharma-remark {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #3b4252;
+    font-style: italic;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.gameover-stats {
+    width: 320px;
+    margin-bottom: 25px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #e5e9f0;
+}
+
+.stat-row span:last-child {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+}
+
+.highlight-row {
+    border-bottom: none;
+    margin-top: 5px;
+    background: rgba(216, 27, 96, 0.08);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--neon-pink);
+}
+
+.restart-prompt {
+    font-size: 11px;
+    color: var(--neon-blue);
+    font-weight: bold;
+}
+
+/* Glitch text without glowing shadow */
+.glitch-text {
+    position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--neon-pink);
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 var(--neon-blue), 0 2px var(--neon-pink);
+    clip: rect(85px, 450px, 140px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip: rect(15px, 9999px, 66px, 0); }
+    100% { clip: rect(34px, 9999px, 55px, 0); }
+}
+
+@keyframes glitch-anim2 {
+    0% { clip: rect(70px, 9999px, 105px, 0); }
+    100% { clip: rect(12px, 9999px, 85px, 0); }
+}
+
+/* Cabinet Control Footer */
+.cabinet-footer {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 4px double var(--neon-blue);
+    padding-top: 15px;
+}
+
+.audio-control-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.cabinet-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 
+        0 4px 0 #b8bfca,
+        0 6px 10px rgba(0,0,0,0.1);
+    transition: all 0.1s ease;
+    outline: none;
+}
+
+.cabinet-btn:active {
+    transform: translateY(3px);
+    box-shadow: 
+        0 1px 0 #b8bfca,
+        0 2px 4px rgba(0,0,0,0.1);
+}
+
+.green-btn {
+    background: #d81b60;
+    color: #fff;
+    border: 2px solid #ad1457;
+    box-shadow: 
+        0 4px 0 #ad1457,
+        0 2px 4px rgba(0,0,0,0.1);
+}
+
+.green-btn.unmuted {
+    background: var(--neon-green);
+    color: #fff;
+    border: 2px solid #1b5e20;
+    box-shadow: 
+        0 4px 0 #1b5e20,
+        0 2px 4px rgba(0,0,0,0.15);
+}
+
+.btn-label {
+    font-size: 7px;
+    color: #4c566a;
+    letter-spacing: 1px;
+}
+
+/* Coin Slot aesthetics */
+.coin-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.insert-coin {
+    font-size: 7px;
+    color: var(--neon-yellow);
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 0.2; }
+    50%, 100% { opacity: 1; }
+}
+
+.coin-light {
+    width: 25px;
+    height: 35px;
+    background: rgba(216, 27, 96, 0.1);
+    border: 3px solid #b8bfca;
+    border-radius: 3px;
+    position: relative;
+}
+
+.coin-light::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    width: 3px;
+    height: 20px;
+    background: var(--neon-pink);
+}
+
+/* Branding Details */
+.branding {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #4c566a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.led-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b8bfca;
+}
+
+.led-dot.active {
+    background: var(--neon-green);
+    box-shadow: 0 0 6px var(--neon-green);
+    animation: fast-pulse 0.6s infinite alternate;
+}
+
+@keyframes fast-pulse {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* Portrait orientation lock prompt if mobile */
+@media (max-width: 860px) {
+    .cabinet-container {
+        width: 95vw;
+        border-width: 5px;
+        padding: 10px;
+    }
+    .crt-screen {
+        width: 100%;
+        height: 50vw;
+    }
+}
+
+/* ============================================================
+   PHONE NOTIFICATION POPUP (WhatsApp style, 500m milestones)
+   ============================================================ */
+.notif-popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    backdrop-filter: blur(4px);
+}
+
+.notif-popup.hidden {
+    display: none;
+}
+
+.notif-phone {
+    background: linear-gradient(135deg, #1f1f1f, #2d2d2d);
+    border: 2px solid #404040;
+    border-radius: 18px;
+    padding: 20px 24px;
+    width: 280px;
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.06);
+    animation: notif-slide-in 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+
+@keyframes notif-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.notif-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #3a3a3a;
+    padding-bottom: 10px;
+}
+
+.notif-app-icon {
+    font-size: 20px;
+}
+
+.notif-app-name {
+    font-family: 'Share Tech Mono', monospace;
+    color: #25d366; /* WhatsApp green */
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    flex: 1;
+}
+
+.notif-time {
+    font-family: 'Share Tech Mono', monospace;
+    color: #888;
+    font-size: 9px;
+}
+
+.notif-sender {
+    font-family: 'Press Start 2P', monospace;
+    color: #25d366;
+    font-size: 7px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.notif-message {
+    font-family: 'Share Tech Mono', monospace;
+    color: #e8e8e8;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+}
+
+.notif-tap {
+    font-family: 'Press Start 2P', monospace;
+    color: #888;
+    font-size: 6px;
+    text-align: center;
+    animation: fast-pulse 0.8s infinite alternate;
+}
+
+/* Vibration shake effect when notification appears */
+@keyframes notif-vibrate {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-4px); }
+    20% { transform: translateX(4px); }
+    30% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    50% { transform: translateX(-3px); }
+    60% { transform: translateX(3px); }
+    70% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+    90% { transform: translateX(-1px); }
+}
+
+.notif-phone.vibrate {
+    animation: notif-slide-in 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+               notif-vibrate 0.5s 0.35s ease;
+}
+
+/* ============================================================
+   NEXT LEVEL BUTTON
+   ============================================================ */
+.next-level-button {
+    display: block;
+    margin: 14px auto 0;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+    color: #69ff47;
+    border: 3px solid #69ff47;
+    border-radius: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 0 16px rgba(105, 255, 71, 0.35), 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    animation: fast-pulse 1s infinite alternate;
+}
+
+.next-level-button:hover {
+    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    box-shadow: 0 0 28px rgba(105, 255, 71, 0.6), 0 4px 16px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+}
+
+/* Win subtitle line */
+.win-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    color: #4c566a;
+    font-size: 12px;
+    margin: 8px 0 12px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Level 2 celebration emoji row */
+.win-celebration-row {
+    font-size: 22px;
+    text-align: center;
+    margin: 8px 0;
+    letter-spacing: 4px;
+    animation: notif-slide-in 0.6s ease;
+}
+
+.win-celebration-row.hidden {
+    display: none;
+}
