@@ -24,6 +24,12 @@
             <div class="flicker"></div>
             <div class="screen-glare"></div>
 
+            <!-- Top Controls Overlay (Pause and Light/Dark Mode) -->
+            <div class="top-controls">
+                <button id="pause-toggle-btn" class="control-btn" title="Pause/Resume Game">⏸</button>
+                <button id="theme-toggle-btn" class="control-btn" title="Toggle Theme">☀️</button>
+            </div>
+
             <!-- Game HUD (Overlay on top of canvas) -->
             <div id="hud" class="hud-container hidden">
                 <div class="hud-item attendance-container">
@@ -51,7 +57,7 @@
             <!-- Start/Menu Screen -->
             <div id="menu-screen" class="screen-overlay">
                 <h2 class="menu-title pulsating">PRESS SPACE TO START</h2>
-                <p class="menu-desc">Vardhan woke up at 8:45 AM! DAA Lab Viva starts at 9:00 AM. Run to college before Sharma Sir debars you!</p>
+                <p class="menu-desc">You woke up at 8:45 AM! Your DAA Lab Viva starts at 9:00 AM. Run to college before the Professor debars you!</p>
                 <div class="controls-guide">
                     <div class="guide-item">
                         <span class="key">Space / Up / W</span>
@@ -63,7 +69,7 @@
                     </div>
                 </div>
                 <div class="story-teaser">
-                    <span class="story-tag">GOAL:</span> Maintain <strong class="neon-pink">&gt;75% Attendance</strong>. Escape Gully Dogs, Autos, Cows, and Sharma Sir!
+                    <span class="story-tag">GOAL:</span> Maintain <strong class="neon-pink">&gt;75% Attendance</strong>. Escape Gully Dogs, Autos, Cows, and the Professor!
                 </div>
             </div>
 
@@ -132,7 +138,7 @@
                         <span class="notif-app-name">WhatsApp</span>
                         <span class="notif-time">now</span>
                     </div>
-                    <div class="notif-sender">Saketh 🤙</div>
+                    <div class="notif-sender">Friend 🤙</div>
                     <div id="notif-message" class="notif-message">bro where are you!! its college time!!</div>
                     <div class="notif-tap">Tap to dismiss</div>
                 </div>
@@ -154,6 +160,12 @@
                 <span class="led-dot active"></span>
             </div>
         </footer>
+    </div>
+
+    <!-- Mobile Rotate Device Overlay -->
+    <div class="rotate-device-overlay">
+        <div class="rotate-phone-icon">📱🔄</div>
+        <div class="rotate-text">Rotate your screen to Landscape to play!</div>
     </div>
 
     <!-- Core Game Code -->

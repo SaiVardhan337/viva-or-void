@@ -26,6 +26,8 @@ const sharmaRemarkEl = document.getElementById('sharma-remark');
 const finalDistanceEl = document.getElementById('final-distance');
 const finalCommitsEl = document.getElementById('final-commits');
 const highScoreEl = document.getElementById('high-score');
+const pauseToggleBtn = document.getElementById('pause-toggle-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
 // Game States
 let gameState = 'MENU'; // MENU, PLAYING, PLAYING_L2, GAMEOVER, PAUSED, WIN, WIN_L1, NOTIF
@@ -574,34 +576,72 @@ class BackgroundLayer {
 }
 
 const bgLayers = [
-    // Layer 0: Sky, Sun and Clouds (Distant daylight)
+    // Layer 0: Sky, Sun and Clouds (Distant daylight / Moonlight night)
     new BackgroundLayer(0.05, (xOffset) => {
-        // Sky gradient (daylight blue)
+        const isDark = document.body.classList.contains('dark-theme');
+        
+        // Sky gradient
         const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-        gradient.addColorStop(0, currentLevel === 2 ? '#b3d9f7' : '#7ac2f0');
-        gradient.addColorStop(1, currentLevel === 2 ? '#daeeff' : '#bee1f7');
+        if (isDark) {
+            gradient.addColorStop(0, '#0a0b12'); // Deep starry night sky
+            gradient.addColorStop(1, '#1b1d2e');
+        } else {
+            gradient.addColorStop(0, currentLevel === 2 ? '#b3d9f7' : '#7ac2f0');
+            gradient.addColorStop(1, currentLevel === 2 ? '#daeeff' : '#bee1f7');
+        }
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, 250);
 
-        // Pixelated Sun (with 8-bit rays)
-        ctx.fillStyle = '#ffdf00'; // Yellow
-        ctx.fillRect(620, 30, 48, 48);
-        ctx.fillStyle = '#ff9900'; // Orange outline
-        ctx.strokeRect(620, 30, 48, 48);
-        // Sun rays blocky highlights
-        ctx.fillStyle = 'rgba(255, 223, 0, 0.4)';
-        ctx.fillRect(610, 40, 8, 28);
-        ctx.fillRect(670, 40, 8, 28);
-        ctx.fillRect(630, 20, 28, 8);
-        ctx.fillRect(630, 80, 28, 8);
+        if (isDark) {
+            // Draw Stars in the sky
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(80, 40, 2, 2);
+            ctx.fillRect(150, 80, 3, 3);
+            ctx.fillRect(240, 50, 2, 2);
+            ctx.fillRect(320, 90, 2, 2);
+            ctx.fillRect(450, 30, 3, 3);
+            ctx.fillRect(520, 70, 2, 2);
+            ctx.fillRect(710, 60, 2, 2);
 
-        // Dynamic Clouds and Birds are rendered directly in drawGame()
+            // Blocky Silver Moon
+            ctx.fillStyle = '#e5e9f0'; // Silver moon body
+            ctx.fillRect(620, 30, 48, 48);
+            ctx.fillStyle = '#d8dee9'; // Moon craters / highlights
+            ctx.fillRect(628, 38, 12, 12);
+            ctx.fillRect(644, 54, 10, 10);
+            
+            // Moon glow
+            ctx.fillStyle = 'rgba(229, 233, 240, 0.15)';
+            ctx.fillRect(610, 40, 8, 28);
+            ctx.fillRect(670, 40, 8, 28);
+            ctx.fillRect(630, 20, 28, 8);
+            ctx.fillRect(630, 80, 28, 8);
+        } else {
+            // Pixelated Sun (with 8-bit rays)
+            ctx.fillStyle = '#ffdf00'; // Yellow
+            ctx.fillRect(620, 30, 48, 48);
+            ctx.fillStyle = '#ff9900'; // Orange outline
+            ctx.strokeRect(620, 30, 48, 48);
+            // Sun rays blocky highlights
+            ctx.fillStyle = 'rgba(255, 223, 0, 0.4)';
+            ctx.fillRect(610, 40, 8, 28);
+            ctx.fillRect(670, 40, 8, 28);
+            ctx.fillRect(630, 20, 28, 8);
+            ctx.fillRect(630, 80, 28, 8);
+        }
 
-        // Distant Green Town Skyline (tree-silhouette/hills at horizon)
-        ctx.fillStyle = currentLevel === 2 ? '#a5c98a' : '#7eb87e';
-        ctx.fillRect(0, 200, canvas.width, 60);
-        
-        ctx.fillStyle = currentLevel === 2 ? '#85a868' : '#659c65';
+        // Distant Town Skyline / Hills
+        if (isDark) {
+            ctx.fillStyle = currentLevel === 2 ? '#242e3f' : '#1b2535'; // dark blue-grey trees
+            ctx.fillRect(0, 200, canvas.width, 60);
+            
+            ctx.fillStyle = currentLevel === 2 ? '#1c2533' : '#141c29';
+        } else {
+            ctx.fillStyle = currentLevel === 2 ? '#a5c98a' : '#7eb87e';
+            ctx.fillRect(0, 200, canvas.width, 60);
+            
+            ctx.fillStyle = currentLevel === 2 ? '#85a868' : '#659c65';
+        }
         for (let i = 0; i < canvas.width; i += 120) {
             ctx.beginPath();
             ctx.moveTo(i, 200);
@@ -1663,7 +1703,7 @@ const SHARMA_REMARKS = [
     "\"Bubble Sort takes O(N^2) and you take forever to reach lab!\"",
     "\"I have been waiting since 9:00 AM! Your viva is cancelled!\"",
     "\"Late admission denied! Go redo Semester 6!\"",
-    "\"You missed DAA Viva! Don't write 'Sharma' in your placement logs!\""
+    "\"You missed DAA Viva! Don't expect to pass your placement evaluations!\""
 ];
 
 // --- Main Game Loop & Logic Flow ---
@@ -1779,6 +1819,7 @@ function handleCollisions() {
 function triggerWin() {
     gameState = 'WIN';
     synth.playWinSound();
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'none';
     
     // Save High Score
     if (1000 > highScore) {
@@ -1797,8 +1838,8 @@ function triggerWin() {
         document.getElementById('win-screen').classList.remove('hidden');
         document.getElementById('win-title').textContent = 'GAME COMPLETE!';
         document.getElementById('win-title').setAttribute('data-text', 'GAME COMPLETE!');
-        document.getElementById('win-subtitle').textContent = '🎉 You Did Great, Vardhan! 🎉';
-        document.getElementById('win-message').textContent = '"You made it to class! Sharma Sir is incredibly proud. A+ in the DAA Viva! 🏆"';
+        document.getElementById('win-subtitle').textContent = '🎉 You Did Great, Hero! 🎉';
+        document.getElementById('win-message').textContent = '"You made it to class! The Professor is incredibly proud. A+ in the DAA Viva! 🏆"';
         document.getElementById('next-level-btn').style.display = 'none';
         // Show the emoji celebration row with fireworks
         celebrationEl.classList.remove('hidden');
@@ -1810,7 +1851,7 @@ function triggerWin() {
     document.getElementById('win-title').textContent = 'LEVEL 1 PASSED!';
     document.getElementById('win-title').setAttribute('data-text', 'LEVEL 1 PASSED!');
     document.getElementById('win-subtitle').textContent = '🏃 Made it out of the streets!';
-    document.getElementById('win-message').textContent = '"Outstanding! Now reach the classroom before Sharma Sir marks you absent!"';
+    document.getElementById('win-message').textContent = '"Outstanding! Now reach the classroom before the Professor marks you absent!"';
     document.getElementById('next-level-btn').style.display = 'block';
     celebrationEl.classList.add('hidden'); // Hide for level 1
 
@@ -1823,13 +1864,14 @@ function triggerWin() {
 // Level-aware notification messages (fires at 500m in both levels)
 const NOTIF_MESSAGES = {
     L1_500: "bro where are you!! its college time!! viva starts at 9 am!! 😱",
-    L2_500: "bro you're almost inside the class!! run to your seat fast!! sharma sir is HERE!! 🏃💨"
+    L2_500: "bro you're almost inside the class!! run to your seat fast!! the Professor is HERE!! 🏃💨"
 };
 
 function triggerNotification(milestone) {
     gameState = 'NOTIF';
     synth.stopBGM();
     notifMilestone = milestone;
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'none';
 
     const popup = document.getElementById('notif-popup');
     const msgEl = document.getElementById('notif-message');
@@ -1854,11 +1896,13 @@ function dismissNotif() {
     document.getElementById('notif-popup').classList.add('hidden');
     gameState = 'PLAYING';
     synth.startBGM();
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
 }
 
 function triggerGameOver() {
     gameState = 'GAMEOVER';
     synth.playGameOver();
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'none';
     
     // Save High Score
     if (Math.floor(distance) > highScore) {
@@ -2222,7 +2266,12 @@ window.addEventListener('keydown', (e) => {
 let touchStartX = 0;
 let touchStartY = 0;
 
-canvas.addEventListener('touchstart', (e) => {
+const crtScreen = document.querySelector('.crt-screen');
+
+crtScreen.addEventListener('touchstart', (e) => {
+    // Ignore touches on interactive buttons/links
+    if (e.target.closest('.control-btn') || e.target.closest('button') || e.target.closest('a')) return;
+    
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     
@@ -2241,7 +2290,9 @@ canvas.addEventListener('touchstart', (e) => {
     }
 }, { passive: true });
 
-canvas.addEventListener('touchend', (e) => {
+crtScreen.addEventListener('touchend', (e) => {
+    // Ignore touches on interactive buttons/links
+    if (e.target.closest('.control-btn') || e.target.closest('button') || e.target.closest('a')) return;
     if (gameState !== 'PLAYING') return;
 
     const diffX = e.changedTouches[0].clientX - touchStartX;
@@ -2271,6 +2322,7 @@ function startGame() {
     document.getElementById('win-screen').classList.add('hidden');
     document.getElementById('notif-popup').classList.add('hidden');
     hudElement.classList.remove('hidden');
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
     
     initGame(1);
     synth.init();
@@ -2282,6 +2334,7 @@ function startLevel2() {
     document.getElementById('win-screen').classList.add('hidden');
     document.getElementById('notif-popup').classList.add('hidden');
     hudElement.classList.remove('hidden');
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
     
     // Change win screen title for Level 2
     document.querySelector('#win-screen h2').setAttribute('data-text', 'GAME COMPLETE!');
@@ -2297,6 +2350,7 @@ function restartGame() {
     document.getElementById('win-screen').classList.add('hidden');
     document.getElementById('notif-popup').classList.add('hidden');
     hudElement.classList.remove('hidden');
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
     
     initGame(currentLevel);
     synth.startBGM();
@@ -2307,10 +2361,12 @@ function togglePause() {
         gameState = 'PAUSED';
         pauseScreen.classList.remove('hidden');
         synth.stopBGM();
+        if (pauseToggleBtn) pauseToggleBtn.textContent = '▶';
     } else if (gameState === 'PAUSED') {
         gameState = 'PLAYING';
         pauseScreen.classList.add('hidden');
         synth.startBGM();
+        if (pauseToggleBtn) pauseToggleBtn.textContent = '⏸';
     }
 }
 
@@ -2322,3 +2378,30 @@ requestAnimationFrame(gameLoop);
 document.getElementById('notif-popup').addEventListener('click', () => {
     dismissNotif();
 });
+
+// --- Theme Toggle Logic & Event Listeners ---
+const savedTheme = localStorage.getItem('btech-theme') || 'light';
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+    themeToggleBtn.textContent = '🌙';
+} else {
+    themeToggleBtn.textContent = '☀️';
+}
+
+themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    themeToggleBtn.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('btech-theme', isDark ? 'dark' : 'light');
+});
+
+// Pause Button Click Listener
+pauseToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent canvas touch trigger
+    togglePause();
+});
+
+// Initially hide pause button on Menu Screen
+if (pauseToggleBtn) {
+    pauseToggleBtn.style.display = 'none';
+}

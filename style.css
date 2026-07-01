@@ -265,6 +265,14 @@ body {
     padding: 30px;
     text-align: center;
     box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.05);
+    pointer-events: none; /* Let touches/clicks pass through to canvas */
+}
+
+/* Keep buttons and interactive elements clickable */
+.screen-overlay button,
+.screen-overlay a,
+.screen-overlay .sharma-remark-box {
+    pointer-events: auto;
 }
 
 .hidden {
@@ -759,4 +767,325 @@ body {
 
 .win-celebration-row.hidden {
     display: none;
+}
+
+/* -------------------------------------------------------------
+   PAUSE AND THEME CONTROLS (TOP RIGHT)
+   ------------------------------------------------------------- */
+.top-controls {
+    position: absolute;
+    top: 55px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+
+.control-btn {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid var(--cabinet-border);
+    color: #2e3440;
+    font-family: inherit;
+    font-size: 11px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+    pointer-events: auto;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+/* -------------------------------------------------------------
+   DARK THEME OVERRIDES (NORD/POLAR NIGHT THEME STYLE)
+   ------------------------------------------------------------- */
+body.dark-theme {
+    --bg-color: #1e222a;           /* Dark polar night background */
+    --cabinet-border: #3b4252;     /* Darker grey-blue bezel */
+    --cabinet-bg: #2e3440;         /* Nord dark console plastic */
+    --screen-bg: #101217;          /* Dark black screen overlay */
+    --neon-green: #a3be8c;         /* Pastel green */
+    --neon-pink: #bf616a;          /* Pastel pink/red */
+    --neon-blue: #81a1c1;          /* Pastel blue */
+    --neon-yellow: #ebcb8b;        /* Pastel yellow */
+    --glass-glow: rgba(129, 161, 193, 0.04);
+    color: #d8dee9;
+}
+
+/* Dark mode structural adjustments */
+body.dark-theme .cabinet-container {
+    color: #e5e9f0;
+    box-shadow: 
+        0 0 0 4px #242933,
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        inset 0 0 30px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .cabinet-footer {
+    border-top: 4px solid #3b4252;
+}
+
+body.dark-theme .cabinet-header {
+    border-bottom: 4px solid #3b4252;
+}
+
+body.dark-theme .screen-overlay {
+    background: rgba(21, 26, 36, 0.96);
+    color: #e5e9f0;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .menu-desc {
+    color: #d8dee9;
+}
+
+body.dark-theme .hud-item {
+    background: rgba(46, 52, 64, 0.9);
+    border-color: #434c5e;
+    color: #e5e9f0;
+}
+
+body.dark-theme .hud-label {
+    color: #d8dee9;
+}
+
+body.dark-theme .control-btn {
+    background: rgba(46, 52, 64, 0.9);
+    border-color: #4c566a;
+    color: #e5e9f0;
+}
+
+body.dark-theme .control-btn:hover {
+    background: #434c5e;
+}
+
+body.dark-theme .sharma-remark-box {
+    background: #3b4252;
+    border-color: #4c566a;
+}
+
+body.dark-theme #sharma-remark {
+    color: #e5e9f0;
+}
+
+body.dark-theme .restart-prompt {
+    color: #ebcb8b;
+}
+
+body.dark-theme .win-subtitle {
+    color: #d8dee9;
+}
+
+body.dark-theme .coin-light {
+    background: #bf616a;
+    box-shadow: 0 0 10px #bf616a;
+}
+
+/* -------------------------------------------------------------
+   MOBILE COMPATIBILITY & RESPONSIVE LAYOUT
+   ------------------------------------------------------------- */
+.rotate-device-overlay {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    body {
+        padding: 0;
+        height: auto;
+        min-height: 100vh;
+        align-items: center;
+        overflow-y: auto;
+        background-size: cover;
+    }
+    
+    .cabinet-container {
+        width: 100%;
+        max-width: 100vw;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 10px;
+        min-height: 100vh;
+        justify-content: center;
+    }
+    
+    .cabinet-header {
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+    }
+    .cabinet-header h1 {
+        font-size: 16px;
+    }
+    .cabinet-header .subtitle {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+
+    .crt-screen {
+        width: 100%;
+        height: calc((100vw - 20px) * 0.5); /* Force 2:1 aspect ratio */
+        border: 6px solid #3b4252;
+        border-radius: 6px;
+    }
+    
+    /* Responsive Screen Overlays */
+    .menu-title {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+    .menu-desc {
+        font-size: 8px;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        max-width: 95%;
+    }
+    .controls-guide {
+        display: none !important; /* Hide keyboard controls guide on mobile */
+    }
+    .story-teaser {
+        font-size: 7px;
+    }
+    .gameover-title {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+    .sharma-remark-box {
+        padding: 8px;
+        margin-bottom: 8px;
+        max-width: 95%;
+    }
+    #sharma-remark {
+        font-size: 10px;
+        line-height: 1.3;
+    }
+    .gameover-stats {
+        font-size: 8px;
+        margin-bottom: 8px;
+    }
+    .stat-row {
+        margin-bottom: 4px;
+    }
+    .restart-prompt {
+        font-size: 8px;
+    }
+    .next-level-button {
+        padding: 8px 14px;
+        font-size: 9px;
+        margin-top: 5px;
+    }
+    .win-subtitle {
+        font-size: 9px;
+        margin: 4px 0 8px;
+    }
+    
+    /* HUD responsive scaling */
+    .hud-container {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+    }
+    .hud-item {
+        padding: 4px 8px;
+        border-width: 1px;
+    }
+    .hud-label {
+        font-size: 6px;
+    }
+    .hud-value {
+        font-size: 8px;
+    }
+    .attendance-bar-wrapper {
+        width: 70px;
+        height: 10px;
+    }
+    .attendance-fill {
+        font-size: 6px;
+    }
+    
+    /* Top Controls Scale */
+    .top-controls {
+        top: 35px;
+        right: 8px;
+        gap: 6px;
+    }
+    .control-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 9px;
+        border-width: 1px;
+    }
+    
+    /* Cabinet Footer Adjustments */
+    .cabinet-footer {
+        padding-top: 10px;
+        border-width: 2px;
+        margin-top: 8px;
+    }
+    .audio-control-panel {
+        font-size: 8px;
+    }
+    .cabinet-btn {
+        padding: 6px 12px;
+        font-size: 9px;
+        border-radius: 4px;
+    }
+    .branding {
+        font-size: 8px;
+    }
+    .insert-coin {
+        font-size: 7px;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE ORIENTATION PORTRAIT WARNING
+   ------------------------------------------------------------- */
+@media (max-width: 900px) and (orientation: portrait) {
+    .rotate-device-overlay {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #0f1015;
+        color: #ffffff;
+        z-index: 9999;
+        text-align: center;
+        padding: 20px;
+        font-family: 'Press Start 2P', monospace;
+    }
+    .rotate-phone-icon {
+        font-size: 48px;
+        animation: rotate-animation 2s infinite ease-in-out;
+        margin-bottom: 25px;
+    }
+    .rotate-text {
+        font-size: 11px;
+        line-height: 1.6;
+        letter-spacing: 1px;
+        color: #e5e9f0;
+    }
+}
+
+@keyframes rotate-animation {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
 }
