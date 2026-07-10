@@ -1,6 +1,6 @@
-# B.Tech Runner 🏃‍♂️🎓
+# Viva or Void 🏃‍♂️🎓
 
-**B.Tech Runner** is an endless 2D side-scrolling runner game built using HTML Canvas and Vanilla JavaScript. Embark on the frantic morning commute of a B.Tech student running late for their crucial DAA Viva exam! Avoid local street obstacles and classroom hallway hurdles, keep your attendance at 100%, and make it to the classroom before the Professor locks the door.
+**Viva or Void** is a level-based 2D side-scrolling runner game built using HTML Canvas and Vanilla JavaScript. Embark on the frantic morning commute of a B.Tech student running late for their crucial DAA Viva exam! Avoid local street obstacles and classroom hallway hurdles, keep your attendance at 100%, and make it to the classroom before the Professor locks the door.
 
 ---
 

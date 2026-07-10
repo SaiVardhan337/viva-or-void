@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------
-   LATE FOR VIVA: CS B.TECH RUNNER - GAME ENGINE
+   VIVA OR VOID - GAME ENGINE
    Pure JS HTML5 Canvas game with procedurally generated retro
    visuals, Web Audio synth, and custom pixel-art loader.
    ------------------------------------------------------------- */
