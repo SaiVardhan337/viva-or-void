@@ -1908,8 +1908,7 @@ function handleCollisions() {
                     synth.playHit();
                     
                     // Push player back / visual camera shake (implied by hit effect)
-                    if (attendance <= 0) {
-                        attendance = 0;
+                    if (attendance < 50.0) {
                         triggerGameOver();
                     }
                     updateHUD();
@@ -2087,8 +2086,7 @@ function updateGame() {
 
     // Attendance decays at 1% per 10 seconds = 0.1% per second = 0.001667 per frame @ 60 FPS
     attendance -= 0.001667;
-    if (attendance <= 0) {
-        attendance = 0;
+    if (attendance < 50.0) {
         triggerGameOver();
     }
     updateHUD();
