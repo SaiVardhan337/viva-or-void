@@ -63,6 +63,12 @@ dogImage.src = 'assets/dog.png';
 let isDogImageLoaded = false;
 let transparentDogCanvas = null;
 
+// Cow Sprite Setup (Light background transparency filter)
+const cowImage = new Image();
+cowImage.src = 'assets/cow.png';
+let isCowImageLoaded = false;
+let transparentCowCanvas = null;
+
 // Classroom Background Image (Level 2, 500m+)
 const classroomImage = new Image();
 classroomImage.src = 'assets/classroom.jpg';
@@ -103,6 +109,11 @@ dogImage.onload = () => {
     processDogImage();
 };
 
+cowImage.onload = () => {
+    isCowImageLoaded = true;
+    processCowImage();
+};
+
 function processDogImage() {
     transparentDogCanvas = document.createElement('canvas');
     transparentDogCanvas.width = dogImage.width;
@@ -111,6 +122,28 @@ function processDogImage() {
     tempCtx.drawImage(dogImage, 0, 0);
 
     const imgData = tempCtx.getImageData(0, 0, dogImage.width, dogImage.height);
+    const data = imgData.data;
+
+    // Filter white pixels (RGB close to 255)
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        if (r > 240 && g > 240 && b > 240) {
+            data[i + 3] = 0;
+        }
+    }
+    tempCtx.putImageData(imgData, 0, 0);
+}
+
+function processCowImage() {
+    transparentCowCanvas = document.createElement('canvas');
+    transparentCowCanvas.width = cowImage.width;
+    transparentCowCanvas.height = cowImage.height;
+    const tempCtx = transparentCowCanvas.getContext('2d');
+    tempCtx.drawImage(cowImage, 0, 0);
+
+    const imgData = tempCtx.getImageData(0, 0, cowImage.width, cowImage.height);
     const data = imgData.data;
 
     // Filter white pixels (RGB close to 255)
@@ -1218,9 +1251,9 @@ class GameItem {
                 break;
             case 'cow':
                 this.width = 68;
-                this.height = 50;
-                // Cow sits on pavement/road junction
-                this.y = player.groundY + 10;
+                this.height = 58;
+                // Standing cow sits on pavement/road junction, bottom aligned at Y=320
+                this.y = player.groundY + 2;
                 break;
             case 'auto':
                 this.width = 72;
@@ -1379,16 +1412,20 @@ class GameItem {
                 break;
                 
             case 'cow':
-                // Sleeping Indian Cow
-                ctx.fillStyle = '#e8d8c8';
-                ctx.fillRect(this.x + 10, this.y + 10, 45, 35); // Torso
-                ctx.fillRect(this.x + 45, this.y, 15, 20); // Head
-                ctx.fillStyle = '#bda58d';
-                ctx.fillRect(this.x + 50, this.y - 6, 4, 8); // Horns
-                ctx.fillRect(this.x + 56, this.y - 6, 4, 8);
-                ctx.fillStyle = '#8c735d';
-                ctx.fillRect(this.x + 12, this.y + 40, 6, 5); // Sitting Hooves
-                ctx.fillRect(this.x + 35, this.y + 40, 6, 5);
+                if (isCowImageLoaded && transparentCowCanvas) {
+                    ctx.drawImage(transparentCowCanvas, this.x, this.y, this.width, this.height);
+                } else {
+                    // Fallback Sleeping Indian Cow
+                    ctx.fillStyle = '#e8d8c8';
+                    ctx.fillRect(this.x + 10, this.y + 10, 45, 35); // Torso
+                    ctx.fillRect(this.x + 45, this.y, 15, 20); // Head
+                    ctx.fillStyle = '#bda58d';
+                    ctx.fillRect(this.x + 50, this.y - 6, 4, 8); // Horns
+                    ctx.fillRect(this.x + 56, this.y - 6, 4, 8);
+                    ctx.fillStyle = '#8c735d';
+                    ctx.fillRect(this.x + 12, this.y + 40, 6, 5); // Sitting Hooves
+                    ctx.fillRect(this.x + 35, this.y + 40, 6, 5);
+                }
                 break;
 
             case 'auto':
