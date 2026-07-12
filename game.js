@@ -2533,41 +2533,38 @@ function drawGame() {
         const bgHeight = player.groundY + 10; // 270px
         
         if (currentLevel === 3) {
-            // Level 3 is stationary/slowly scrolling classroom (viva room)
-            const bgScroll = (distance * 10) % canvas.width;
-            if (isClassroomLoaded) {
-                ctx.drawImage(classroomImage, -bgScroll, 0, canvas.width, bgHeight);
-                ctx.drawImage(classroomImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
+            // Draw Level 3 stationary classroom lab backdrop
+            if (isClassroomLevel3Loaded) {
+                ctx.drawImage(classroomLevel3Image, 0, 0, canvas.width, bgHeight);
+            } else {
+                ctx.fillStyle = '#1f232a';
+                ctx.fillRect(0, 0, canvas.width, bgHeight);
             }
 
             // Draw the Professor Boss floating on the right
-            const bossFloat = Math.sin(Date.now() / 250) * 8; // Float up and down
-            const bossX = canvas.width - 120;
-            const bossY = player.groundY - 15 + bossFloat;
+            const bossFloat = Math.sin(Date.now() / 250) * 8;
+            const bossX = canvas.width - 150;
+            const bossY = player.groundY - 100 + bossFloat;
             
-            // Draw Professor body (similar to sharma drawing in GameItem.draw())
-            ctx.fillStyle = '#3f51b5'; // Blue Shirt
-            ctx.fillRect(bossX + 8, bossY + 15, 20, 25);
-            ctx.fillStyle = '#212121'; // Grey Pants
-            ctx.fillRect(bossX + 8, bossY + 40, 20, 30);
-            ctx.fillStyle = '#ffdbb5'; // Head
-            ctx.fillRect(bossX + 10, bossY, 16, 16);
-            ctx.fillStyle = '#5d4037'; // Hair
-            ctx.fillRect(bossX + 8, bossY, 20, 4);
-            ctx.fillStyle = '#fff'; // Specs
-            ctx.fillRect(bossX + 11, bossY + 5, 14, 3);
-            ctx.fillStyle = '#ff007f'; // Red tie
-            ctx.fillRect(bossX + 17, bossY + 15, 2, 12);
+            if (isProfessorLoaded && transparentProfessorCanvas) {
+                ctx.drawImage(transparentProfessorCanvas, bossX, bossY, 110, 110);
+            } else {
+                // Fallback vector drawing (Professor body)
+                ctx.fillStyle = '#3f51b5';
+                ctx.fillRect(bossX + 30, bossY + 40, 40, 50);
+                ctx.fillStyle = '#ffdbb5';
+                ctx.fillRect(bossX + 40, bossY + 10, 20, 30);
+            }
             
-            // Draw a glow border
-            ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(bossX + 4, bossY - 4, 28, 78);
+            // Draw a subtle neon glow border
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(bossX, bossY, 110, 110);
             
             // Text label
             ctx.fillStyle = '#ff007f';
-            ctx.font = '6px "Press Start 2P"';
-            ctx.fillText("THE EXAMINER", bossX - 10, bossY - 10);
+            ctx.font = '5px "Press Start 2P"';
+            ctx.fillText("THE EXAMINER", bossX + 15, bossY - 8);
         } else {
             // Level 2 scrolling corridor backdrop
             const bgScroll = (distance * 25) % canvas.width;
