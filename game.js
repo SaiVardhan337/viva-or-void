@@ -30,9 +30,10 @@ const pauseToggleBtn = document.getElementById('pause-toggle-btn');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
 // Skin Selector Selectors
-const skinBtnStandard = document.getElementById('skin-btn-standard');
 const skinBtnPlaid = document.getElementById('skin-btn-plaid');
-let selectedSkin = localStorage.getItem('btech-skin') || 'standard';
+const skinBtnVarsity = document.getElementById('skin-btn-varsity');
+const skinBtnCrimson = document.getElementById('skin-btn-crimson');
+let selectedSkin = localStorage.getItem('btech-skin') || 'plaid';
 
 // Game States
 let gameState = 'MENU'; // MENU, PLAYING, PLAYING_L2, GAMEOVER, PAUSED, WIN, WIN_L1, NOTIF
@@ -52,17 +53,35 @@ const baseSpeed = 5;
 const maxSpeed = 12;
 let groundOffset = 0; // Added for smooth pavement/road scrolling
 
-// Character Spritesheet Setup
-const spriteSheet = new Image();
-spriteSheet.src = 'assets/vardhan_spritesheet.jpg';
-let isSpriteSheetLoaded = false;
-let transparentSpriteCanvas = null;
+// New Generated Characters Setup
+const char1 = { img: new Image(), src: 'assets/char1.jpg', loaded: false, canvas: null, rows: 3 };
+const char2 = { img: new Image(), src: 'assets/char2.jpg', loaded: false, canvas: null, rows: 3 };
+const char3 = { img: new Image(), src: 'assets/char3.jpg', loaded: false, canvas: null, rows: 4 };
 
-// Character Spritesheet Plaid Setup
-const spriteSheetPlaid = new Image();
-spriteSheetPlaid.src = 'assets/vardhan_plaid_spritesheet.jpg';
-let isSpriteSheetPlaidLoaded = false;
-let transparentSpritePlaidCanvas = null;
+function processCharCanvas(charObj) {
+    charObj.canvas = document.createElement('canvas');
+    charObj.canvas.width = charObj.img.width;
+    charObj.canvas.height = charObj.img.height;
+    const tempCtx = charObj.canvas.getContext('2d');
+    tempCtx.drawImage(charObj.img, 0, 0);
+    const imgData = tempCtx.getImageData(0, 0, charObj.img.width, charObj.img.height);
+    const data = imgData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
+            data[i + 3] = 0; // Transparent
+        }
+    }
+    tempCtx.putImageData(imgData, 0, 0);
+}
+
+char1.img.onload = () => { char1.loaded = true; processCharCanvas(char1); };
+char1.img.src = char1.src;
+
+char2.img.onload = () => { char2.loaded = true; processCharCanvas(char2); };
+char2.img.src = char2.src;
+
+char3.img.onload = () => { char3.loaded = true; processCharCanvas(char3); };
+char3.img.src = char3.src;
 
 // Dog Sprite Setup (Light background transparency filter)
 const dogImage = new Image();
@@ -1232,40 +1251,40 @@ const player = {
             }
         }
 
-        let activeCanvas = transparentSpriteCanvas;
-        let isActiveLoaded = isSpriteSheetLoaded;
-        
-        if (selectedSkin === 'plaid') {
-            activeCanvas = transparentSpritePlaidCanvas;
-            isActiveLoaded = isSpriteSheetPlaidLoaded;
+        let activeChar = null;
+        if (selectedSkin === 'plaid') activeChar = char1;
+        if (selectedSkin === 'varsity') activeChar = char2;
+        if (selectedSkin === 'crimson') activeChar = char3;
+
+        if (activeChar && activeChar.loaded && activeChar.canvas) {
+            // Calculate dynamic slice size based on grid (6 columns)
+            const sliceW = activeChar.img.width / 6;
+            const sliceH = activeChar.img.height / activeChar.rows;
             
-            // Fallback to standard sheet if plaid sheet isn't loaded yet
-            if (!isActiveLoaded || !activeCanvas) {
-                activeCanvas = transparentSpriteCanvas;
-                isActiveLoaded = isSpriteSheetLoaded;
-            }
-        }
-
-        if (isActiveLoaded && activeCanvas) {
-            // Render Vardhan using the spritesheet
-            let sourceRect = SPRITE_MAP.run[this.animFrame]; // Running
-
+            let sliceX = 0;
+            let sliceY = 0;
+            
             if (this.isJumping) {
-                sourceRect = SPRITE_MAP.jump;
+                sliceX = 0;
+                sliceY = sliceH; // Row 2 for jump
             } else if (this.isSliding) {
-                sourceRect = SPRITE_MAP.slide;
+                sliceX = 0;
+                sliceY = sliceH * 2; // Row 3 for duck/slide
             } else if (gameState === 'GAMEOVER') {
-                sourceRect = SPRITE_MAP.hurt;
+                sliceX = sliceW * 2; // Arbitrary hurt frame
+                sliceY = sliceH;
+            } else {
+                sliceX = (this.animFrame % 4) * sliceW; // Row 1 (first 4 frames)
+                sliceY = 0;
             }
 
-            // Draw to canvas
             const scaleW = this.isSliding ? 75 : 60;
             const scaleH = this.isSliding ? 50 : 80;
             const renderY = this.isSliding ? this.y + 30 : this.y;
 
             ctx.drawImage(
-                activeCanvas,
-                sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h,
+                activeChar.canvas,
+                sliceX, sliceY, sliceW, sliceH,
                 this.x, renderY, scaleW, scaleH
             );
         } else {
@@ -2858,23 +2877,17 @@ if (pauseToggleBtn) {
 
 // --- Character Skin Toggle Logic & Initialization ---
 function updateSkinUI() {
-    if (!skinBtnStandard || !skinBtnPlaid) return;
-    if (selectedSkin === 'plaid') {
-        skinBtnPlaid.classList.add('active');
-        skinBtnStandard.classList.remove('active');
-    } else {
-        skinBtnStandard.classList.add('active');
-        skinBtnPlaid.classList.remove('active');
-    }
-}
+    if (skinBtnPlaid) skinBtnPlaid.classList.remove('active');
+    if (skinBtnVarsity) skinBtnVarsity.classList.remove('active');
+    if (skinBtnCrimson) skinBtnCrimson.classList.remove('active');
 
-if (skinBtnStandard) {
-    skinBtnStandard.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectedSkin = 'standard';
-        localStorage.setItem('btech-skin', 'standard');
-        updateSkinUI();
-    });
+    if (selectedSkin === 'plaid' && skinBtnPlaid) {
+        skinBtnPlaid.classList.add('active');
+    } else if (selectedSkin === 'varsity' && skinBtnVarsity) {
+        skinBtnVarsity.classList.add('active');
+    } else if (selectedSkin === 'crimson' && skinBtnCrimson) {
+        skinBtnCrimson.classList.add('active');
+    }
 }
 
 if (skinBtnPlaid) {
@@ -2882,6 +2895,22 @@ if (skinBtnPlaid) {
         e.stopPropagation();
         selectedSkin = 'plaid';
         localStorage.setItem('btech-skin', 'plaid');
+        updateSkinUI();
+    });
+}
+if (skinBtnVarsity) {
+    skinBtnVarsity.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedSkin = 'varsity';
+        localStorage.setItem('btech-skin', 'varsity');
+        updateSkinUI();
+    });
+}
+if (skinBtnCrimson) {
+    skinBtnCrimson.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedSkin = 'crimson';
+        localStorage.setItem('btech-skin', 'crimson');
         updateSkinUI();
     });
 }
