@@ -76,11 +76,7 @@ cowImage.src = 'assets/cow.png';
 let isCowImageLoaded = false;
 let transparentCowCanvas = null;
 
-// Classroom Background Image (Level 2, 500m+)
-const classroomImage = new Image();
-classroomImage.src = 'assets/classroom.jpg';
-let isClassroomLoaded = false;
-classroomImage.onload = () => { isClassroomLoaded = true; };
+// (Old classroom image logic removed)
 
 // Corridor Background Image (Level 2, 0 to 450m)
 const corridorImage = new Image();
@@ -2313,9 +2309,9 @@ function updateGame() {
     let boostExtra = boostTimer > 0 ? 5 : 0;
     gameSpeed = Math.min(maxSpeed, baseSpeed + (distance * 0.005)) + boostExtra;
 
-    // Win check — Level 1 ends at 1000m, Level 2 ends at 500m, Level 3 ends at 300m
+    // Win check — Level 1 ends at 1000m, Level 2 ends at 250m, Level 3 ends at 300m
     let winDistance = 1000;
-    if (currentLevel === 2) winDistance = 500;
+    if (currentLevel === 2) winDistance = 250;
     else if (currentLevel === 3) winDistance = 300;
 
     if (distance >= winDistance) {
@@ -2416,19 +2412,7 @@ function drawRoad() {
         if (currentLevel === 3) {
             drawVivaRoomFloor();
         } else {
-            if (distance < 450) {
-                drawCorridorFloor();
-            } else if (distance >= 500) {
-                drawClassroomFloor();
-            } else {
-                // Transition: blend both floors
-                const ratio = (distance - 450) / 50;
-                ctx.save();
-                drawCorridorFloor();
-                ctx.globalAlpha = ratio;
-                drawClassroomFloor();
-                ctx.restore();
-            }
+            drawCorridorFloor();
         }
     }
 }
@@ -2608,30 +2592,10 @@ function drawGame() {
             // Level 2 scrolling corridor backdrop
             const bgScroll = (distance * 25) % canvas.width;
 
-            if (distance < 450) {
-                // Corridor only
-                if (isCorridorLoaded) {
-                    ctx.drawImage(corridorImage, -bgScroll, 0, canvas.width, bgHeight);
-                    ctx.drawImage(corridorImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
-                }
-            } else if (distance >= 500) {
-                // Classroom only
-                if (isClassroomLoaded) {
-                    ctx.drawImage(classroomImage, -bgScroll, 0, canvas.width, bgHeight);
-                    ctx.drawImage(classroomImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
-                }
-            } else {
-                // Fade Transition (450m to 500m)
-                const ratio = (distance - 450) / 50;
-                if (isCorridorLoaded) {
-                    ctx.drawImage(corridorImage, -bgScroll, 0, canvas.width, bgHeight);
-                    ctx.drawImage(corridorImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
-                }
-                if (isClassroomLoaded) {
-                    ctx.globalAlpha = ratio;
-                    ctx.drawImage(classroomImage, -bgScroll, 0, canvas.width, bgHeight);
-                    ctx.drawImage(classroomImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
-                }
+            // Corridor only for Level 2
+            if (isCorridorLoaded) {
+                ctx.drawImage(corridorImage, -bgScroll, 0, canvas.width, bgHeight);
+                ctx.drawImage(corridorImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
             }
         }
         ctx.restore();
