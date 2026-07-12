@@ -115,28 +115,7 @@ professorImage.src = 'assets/professor.png';
 let isProfessorLoaded = false;
 let transparentProfessorCanvas = null;
 
-// Vardhan Sprite coordinates on 1024x1024 canvas
-const SPRITE_MAP = {
-    run: [
-        { x: 6, y: 6, w: 242, h: 328 },
-        { x: 260, y: 6, w: 242, h: 328 },
-        { x: 514, y: 6, w: 242, h: 328 },
-        { x: 768, y: 6, w: 248, h: 328 }
-    ],
-    jump: { x: 528, y: 364, w: 180, h: 285 },
-    slide: { x: 575, y: 800, w: 280, h: 180 },
-    hurt: { x: 324, y: 408, w: 160, h: 260 }
-};
 
-spriteSheet.onload = () => {
-    isSpriteSheetLoaded = true;
-    processSpriteSheet();
-};
-
-spriteSheetPlaid.onload = () => {
-    isSpriteSheetPlaidLoaded = true;
-    processSpriteSheetPlaid();
-};
 
 dogImage.onload = () => {
     isDogImageLoaded = true;
@@ -219,70 +198,7 @@ function processCowImage() {
     tempCtx.putImageData(imgData, 0, 0);
 }
 
-// Process spritesheet to make white background transparent + lighten character skin tone
-function processSpriteSheet() {
-    transparentSpriteCanvas = document.createElement('canvas');
-    transparentSpriteCanvas.width = spriteSheet.width;
-    transparentSpriteCanvas.height = spriteSheet.height;
-    const tempCtx = transparentSpriteCanvas.getContext('2d');
-    tempCtx.drawImage(spriteSheet, 0, 0);
 
-    const imgData = tempCtx.getImageData(0, 0, spriteSheet.width, spriteSheet.height);
-    const data = imgData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        
-        // If it's near-white, make it transparent (background removal)
-        if (r > 230 && g > 230 && b > 230) {
-            data[i + 3] = 0;
-        } else {
-            // Lighten skin tones: detect warm tan/brown skin pixel range
-            // Skin pixels: r > g > b, reddish-warm dominant
-            if (r > 120 && g > 70 && b > 40 && r > g && g > b && r - b > 30 && r < 220) {
-                // Boost heavily towards white/fair skin tone
-                data[i]     = Math.min(255, r + 100); // Brighten red
-                data[i + 1] = Math.min(255, g + 90); // Brighten green
-                data[i + 2] = Math.min(255, b + 80); // Brighten blue
-            }
-        }
-    }
-    tempCtx.putImageData(imgData, 0, 0);
-}
-
-function processSpriteSheetPlaid() {
-    transparentSpritePlaidCanvas = document.createElement('canvas');
-    transparentSpritePlaidCanvas.width = spriteSheetPlaid.width;
-    transparentSpritePlaidCanvas.height = spriteSheetPlaid.height;
-    const tempCtx = transparentSpritePlaidCanvas.getContext('2d');
-    tempCtx.drawImage(spriteSheetPlaid, 0, 0);
-
-    const imgData = tempCtx.getImageData(0, 0, spriteSheetPlaid.width, spriteSheetPlaid.height);
-    const data = imgData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        
-        // If it's near-white, make it transparent (background removal)
-        if (r > 230 && g > 230 && b > 230) {
-            data[i + 3] = 0;
-        } else {
-            // Lighten skin tones: detect warm tan/brown skin pixel range
-            // Skin pixels: r > g > b, reddish-warm dominant
-            if (r > 120 && g > 70 && b > 40 && r > g && g > b && r - b > 30 && r < 220) {
-                // Boost heavily towards white/fair skin tone
-                data[i]     = Math.min(255, r + 100); // Brighten red
-                data[i + 1] = Math.min(255, g + 90); // Brighten green
-                data[i + 2] = Math.min(255, b + 80); // Brighten blue
-            }
-        }
-    }
-    tempCtx.putImageData(imgData, 0, 0);
-}
 
 // --- Web Audio API Synth Engine ---
 class AudioSynth {
