@@ -1184,11 +1184,13 @@ const player = {
             }
         }
 
-        let activeCanvas = transparentSpriteCanvas;
-        let isActiveLoaded = isSpriteSheetLoaded;
-        if (currentLevel === 2 && isSpriteSheetPlaidLoaded && transparentSpritePlaidCanvas) {
-            activeCanvas = transparentSpritePlaidCanvas;
-            isActiveLoaded = isSpriteSheetPlaidLoaded;
+        let activeCanvas = transparentSpritePlaidCanvas;
+        let isActiveLoaded = isSpriteSheetPlaidLoaded;
+        
+        // Fallback to standard sheet if plaid sheet isn't loaded yet
+        if (!isActiveLoaded || !activeCanvas) {
+            activeCanvas = transparentSpriteCanvas;
+            isActiveLoaded = isSpriteSheetLoaded;
         }
 
         if (isActiveLoaded && activeCanvas) {
