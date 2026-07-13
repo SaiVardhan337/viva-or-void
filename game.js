@@ -1351,7 +1351,7 @@ class GameItem {
                 this.y = player.groundY - 20;
                 break;
             case 'laser':
-                this.width = 200;
+                this.width = 50;
                 this.height = 6;
                 this.isHigh = Math.random() < 0.5;
                 this.y = this.isHigh ? player.groundY - 15 : player.groundY + 30;
@@ -1415,7 +1415,7 @@ class GameItem {
             if (this.type === 'laser' && !this.markedForDeletion) {
                 vivaProgress++;
                 updateHUD();
-                if (vivaProgress >= 10) {
+                if (vivaProgress >= 5) {
                     triggerWin();
                 }
             }
@@ -1992,7 +1992,7 @@ function updateHUD() {
     commitsVal.textContent = commits;
     if (currentLevel === 3) {
         if (distanceLabel) distanceLabel.textContent = 'VIVA PROG:';
-        distanceVal.textContent = vivaProgress + ' / 10';
+        distanceVal.textContent = vivaProgress + ' / 5';
     } else {
         if (distanceLabel) distanceLabel.textContent = 'DISTANCE:';
         distanceVal.textContent = Math.floor(distance) + 'm';
@@ -2087,7 +2087,7 @@ function handleCollisions() {
                         spawnCollectSparks(activeLaser.x + activeLaser.width/2, activeLaser.y + activeLaser.height/2, '#00ffcc');
                     }
                     
-                    if (vivaProgress >= 10) {
+                    if (vivaProgress >= 5) {
                         triggerWin();
                     }
                 }
@@ -2111,7 +2111,7 @@ function triggerWin() {
 
     // Populate win panels
     if (currentLevel === 3) {
-        document.getElementById('win-distance').textContent = 'Defended: 10/10 Qs';
+        document.getElementById('win-distance').textContent = 'Defended: 5/5 Qs';
     } else {
         document.getElementById('win-distance').textContent = finalDist + 'm';
     }
