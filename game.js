@@ -2248,10 +2248,16 @@ function updateGame() {
     player.update();
 
     // Increment distance & speed
-    distance += gameSpeed * 0.05;
-    groundOffset = (groundOffset + gameSpeed) % canvas.width;
     let boostExtra = boostTimer > 0 ? 5 : 0;
-    gameSpeed = Math.min(maxSpeed, baseSpeed + (distance * 0.005)) + boostExtra;
+    if (currentLevel === 3) {
+        gameSpeed = 0;
+        distance = 0;
+        groundOffset = 0;
+    } else {
+        distance += gameSpeed * 0.05;
+        groundOffset = (groundOffset + gameSpeed) % canvas.width;
+        gameSpeed = Math.min(maxSpeed, baseSpeed + (distance * 0.005)) + boostExtra;
+    }
 
     // Win check — Level 1 ends at 1000m, Level 2 ends at 250m, Level 3 ends at 300m
     let winDistance = 1000;
