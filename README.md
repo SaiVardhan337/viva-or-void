@@ -9,6 +9,8 @@
 
 The player must navigate complex streets, dodge campus hazards, maintain a passing attendance rate, and face the ultimate boss: the Examiner, in a real-time classroom Viva Q&A showdown.
 
+![Viva or Void Gameplay](assets/screenshot.png)
+
 ---
 
 ## 🕹️ Play Now
