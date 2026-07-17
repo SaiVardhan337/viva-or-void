@@ -1429,7 +1429,7 @@ class GameItem {
             case 'placement_flyer':
                 this.width = 30;
                 this.height = 30;
-                this.y = player.groundY - 10 - Math.random() * 30;
+                this.y = player.groundY + 5 + Math.random() * 10;
                 break;
             case 'resume':
                 this.width = 24;
