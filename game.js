@@ -155,6 +155,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// --- Spritesheet Pixel Processor ---
+function processSpriteSheet() {
+    transparentSpriteCanvas = document.createElement('canvas');
+    transparentSpriteCanvas.width = spriteSheet.width;
+    transparentSpriteCanvas.height = spriteSheet.height;
+    const tempCtx = transparentSpriteCanvas.getContext('2d');
+    tempCtx.drawImage(spriteSheet, 0, 0);
+    try {
+        const imgData = tempCtx.getImageData(0, 0, spriteSheet.width, spriteSheet.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            // Remove pure white / near-white background pixels
+            if (r > 230 && g > 230 && b > 230) {
+                data[i+3] = 0;
+            }
+        }
+        tempCtx.putImageData(imgData, 0, 0);
+    } catch (e) {
+        // CORS: file:// protocol blocks getImageData — just use the raw image drawn onto canvas
+        console.warn('Spritesheet CORS fallback — using raw image.', e);
+        tempCtx.clearRect(0, 0, transparentSpriteCanvas.width, transparentSpriteCanvas.height);
+        tempCtx.drawImage(spriteSheet, 0, 0);
+    }
+    console.log('✅ Hero spritesheet ready!', spriteSheet.width, 'x', spriteSheet.height);
+}
+
 function processPeerImage() {
     transparentPeerCanvas = document.createElement('canvas');
     transparentPeerCanvas.width = peerImage.width;
