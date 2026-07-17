@@ -3078,12 +3078,30 @@ if (typeof updateSkinUI === 'function') {
 // --- Campaign Selection Toggle Logic & Initialization ---
 function updateCampaignUI() {
     if (!campaignBtnCommute || !campaignBtnPlacement) return;
+    
+    const menuDescEl = document.querySelector('.menu-desc');
+    const storyTeaserEl = document.querySelector('.story-teaser');
+
     if (selectedCampaign === 'placement') {
         campaignBtnPlacement.classList.add('active');
         campaignBtnCommute.classList.remove('active');
+        
+        if (menuDescEl) {
+            menuDescEl.textContent = "You cleared the DAA Viva! 🎓 But your final-round Campus Placement interview with 'YOLO Tech' starts in 10 minutes at the Seminar Hall! Run across the campus lawns to get there!";
+        }
+        if (storyTeaserEl) {
+            storyTeaserEl.innerHTML = '<span class="story-tag">GOAL:</span> Maintain <strong class="neon-pink">&gt;75% Profile Strength</strong>. Dodge competitive peers, security guards, and flying flyers!';
+        }
     } else {
         campaignBtnCommute.classList.add('active');
         campaignBtnPlacement.classList.remove('active');
+        
+        if (menuDescEl) {
+            menuDescEl.textContent = "You woke up at 8:45 AM! Your DAA Lab Viva starts at 9:00 AM. Run to college before the Professor debars you!";
+        }
+        if (storyTeaserEl) {
+            storyTeaserEl.innerHTML = '<span class="story-tag">GOAL:</span> Maintain <strong class="neon-pink">&gt;75% Attendance</strong>. Escape Gully Dogs, Autos, Cows, and the Professor!';
+        }
     }
 }
 
