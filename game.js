@@ -1042,6 +1042,7 @@ function handleCollisions() {
                 } else {
                     // Punished! Deduct attendance
                     attendance -= 15.0; // Big penalty
+                    invincibilityTimer = 90; // 1.5 seconds of recovery grace period!
                     item.markedForDeletion = true;
                     spawnCollectSparks(player.x + player.width/2, player.y + player.height/2, '#ff007f');
                     synth.playHit();
@@ -1954,6 +1955,7 @@ function updateCampaignUI() {
 
 if (campaignBtnCommute) {
     const selectCommute = (e) => {
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         if (selectedCampaign === 'commute') {
             startGame();
@@ -1969,6 +1971,7 @@ if (campaignBtnCommute) {
 
 if (campaignBtnPlacement) {
     const selectPlacement = (e) => {
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         if (selectedCampaign === 'placement') {
             startGame();
@@ -1986,6 +1989,7 @@ if (campaignBtnPlacement) {
 const campaignMobileToggleBtn = document.getElementById('campaign-mobile-toggle-btn');
 if (campaignMobileToggleBtn) {
     const handleMobileToggle = (e) => {
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         selectedCampaign = (selectedCampaign === 'commute') ? 'placement' : 'commute';
         localStorage.setItem('btech-campaign', selectedCampaign);

@@ -91,7 +91,8 @@ class GameItem {
             case 'placement_flyer':
                 this.width = 30;
                 this.height = 30;
-                this.y = groundY + 5 + Math.random() * 10;
+                // Fly at head height: player must slide under it!
+                this.y = groundY - 25 - Math.random() * 15;
                 break;
             case 'resume':
                 this.width = 24;
@@ -370,14 +371,27 @@ class GameItem {
                 break;
 
             case 'peer':
-                // Always drawn in canvas code: 8 unique vibrant pixel-art students
-                this.drawPeerPixelArt(ctx);
+                // Draw image if loaded, otherwise fall back to canvas drawing
+                if (isPeerLoaded && transparentPeerCanvas) {
+                    const cellW = transparentPeerCanvas.width / 4;
+                    const cellH = transparentPeerCanvas.height / 2;
+                    ctx.drawImage(
+                        transparentPeerCanvas,
+                        this.peerIndexX * cellW, this.peerIndexY * cellH, cellW, cellH,
+                        this.x, this.y, this.width, this.height
+                    );
+                } else {
+                    this.drawPeerPixelArt(ctx);
+                }
                 break;
 
-
             case 'security':
-                // Always drawn in canvas code: authoritative grey-uniformed guard
-                this.drawSecurityPixelArt(ctx);
+                // Draw image if loaded, otherwise fall back to canvas drawing
+                if (isSecurityLoaded && transparentSecurityCanvas) {
+                    ctx.drawImage(transparentSecurityCanvas, this.x, this.y, this.width, this.height);
+                } else {
+                    this.drawSecurityPixelArt(ctx);
+                }
                 break;
 
 
