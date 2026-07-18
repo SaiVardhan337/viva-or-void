@@ -150,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all(preloadPromises).then(() => {
         console.log("All assets preloaded successfully! Game ready.");
         if (menuTitle) {
-            menuTitle.textContent = "PRESS SPACE TO START";
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            menuTitle.textContent = isTouch ? "TAP SCREEN TO START" : "PRESS SPACE TO START";
         }
     });
 });
@@ -1954,9 +1955,13 @@ function updateCampaignUI() {
 if (campaignBtnCommute) {
     const selectCommute = (e) => {
         e.stopPropagation();
-        selectedCampaign = 'commute';
-        localStorage.setItem('btech-campaign', 'commute');
-        updateCampaignUI();
+        if (selectedCampaign === 'commute') {
+            startGame();
+        } else {
+            selectedCampaign = 'commute';
+            localStorage.setItem('btech-campaign', 'commute');
+            updateCampaignUI();
+        }
     };
     campaignBtnCommute.addEventListener('click', selectCommute);
     campaignBtnCommute.addEventListener('touchstart', selectCommute, { passive: false });
@@ -1965,9 +1970,13 @@ if (campaignBtnCommute) {
 if (campaignBtnPlacement) {
     const selectPlacement = (e) => {
         e.stopPropagation();
-        selectedCampaign = 'placement';
-        localStorage.setItem('btech-campaign', 'placement');
-        updateCampaignUI();
+        if (selectedCampaign === 'placement') {
+            startGame();
+        } else {
+            selectedCampaign = 'placement';
+            localStorage.setItem('btech-campaign', 'placement');
+            updateCampaignUI();
+        }
     };
     campaignBtnPlacement.addEventListener('click', selectPlacement);
     campaignBtnPlacement.addEventListener('touchstart', selectPlacement, { passive: false });
