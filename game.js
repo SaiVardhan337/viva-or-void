@@ -1491,30 +1491,134 @@ function drawGardensFloor() {
     const floorY = player.groundY; // 260
     const floorH = 140; // up to 400
 
-    // Green grass base
-    ctx.fillStyle = '#4caf50';
+    // Smooth paved concrete campus path (easy on the eyes!)
+    ctx.fillStyle = '#d8dee9'; // Light-grey clean stone road
     ctx.fillRect(0, floorY, canvas.width, floorH);
 
-    // Stone pathway tiles (scrolling)
-    const stoneW = 60;
-    const stoneH = 30;
-    const cycle = groundOffset % (stoneW * 2);
+    // Green lawns (top and bottom borders)
+    ctx.fillStyle = '#a3be8c'; // Soft grass green
+    ctx.fillRect(0, floorY, canvas.width, 10); // Top grass border
+    ctx.fillRect(0, floorY + floorH - 12, canvas.width, 12); // Bottom grass border
 
-    for (let row = 0; row < Math.ceil(floorH / stoneH); row++) {
-        for (let col = -2; col < Math.ceil(canvas.width / stoneW) + 2; col++) {
-            const isStone = (row + col) % 2 === 0;
-            if (isStone) {
-                ctx.fillStyle = '#90a4ae'; // darker grey
-                ctx.fillRect(col * stoneW - cycle, floorY + row * stoneH, stoneW - 6, stoneH - 6);
-                ctx.fillStyle = '#b0bec5'; // light grey highlight
-                ctx.fillRect(col * stoneW - cycle + 2, floorY + row * stoneH + 2, stoneW - 10, stoneH - 10);
+    // Draw thin pavement stones scroll lines (low contrast)
+    ctx.strokeStyle = '#c0c8d8';
+    ctx.lineWidth = 1.5;
+    const tileW = 50;
+    const cycle = groundOffset % tileW;
+
+    ctx.beginPath();
+    for (let x = -tileW; x < canvas.width + tileW; x += tileW) {
+        ctx.moveTo(x - cycle, floorY + 10);
+        ctx.lineTo(x - cycle, floorY + floorH - 12);
+    }
+    ctx.stroke();
+
+    // Top trim grass line (darker green separation)
+    ctx.fillStyle = '#8fbcbb'; // soft blue-green border
+    ctx.fillRect(0, floorY + 8, canvas.width, 2);
+    ctx.fillRect(0, floorY + floorH - 14, canvas.width, 2);
+}
+
+// Draw Parallax College Campus Buildings
+function drawCampusBuildings(ctx, scroll) {
+    const bgHeight = player.groundY + 10; // 270px
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+
+    // We will draw 3 distinct academic block buildings repeating seamlessly
+    const cycle = 400;
+    const offset = scroll % cycle;
+
+    for (let x = -offset; x < canvas.width + cycle; x += cycle) {
+        const globalX = x + scroll;
+        const bIdx = Math.floor(globalX / cycle) % 3;
+
+        if (bIdx === 0) {
+            // --- CSE DEPT BLOCK ---
+            ctx.fillStyle = '#2e3440'; // Slate grey brick block
+            ctx.fillRect(x, bgHeight - 160, 240, 160);
+            
+            // Roof AC units
+            ctx.fillStyle = '#4c566a';
+            ctx.fillRect(x + 30, bgHeight - 170, 25, 10);
+            ctx.fillRect(x + 180, bgHeight - 165, 15, 5);
+
+            // Glowing Windows (Nord Green)
+            ctx.fillStyle = 'rgba(163, 190, 140, 0.65)'; 
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 5; c++) {
+                    ctx.fillRect(x + 20 + c * 40, bgHeight - 135 + r * 28, 20, 14);
+                }
             }
+
+            // Glowing header text
+            ctx.fillStyle = '#a3be8c';
+            ctx.font = 'bold 6px "Press Start 2P"';
+            ctx.fillText("CSE BLOCK", x + 75, bgHeight - 146);
+        } else if (bIdx === 1) {
+            // --- ECE DEPT BLOCK ---
+            ctx.fillStyle = '#3b4252'; // dark blue slate
+            ctx.fillRect(x, bgHeight - 180, 220, 180);
+
+            // Antenna Dish on roof
+            ctx.strokeStyle = '#e5e9f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x + 110, bgHeight - 190, 10, 0, Math.PI, true);
+            ctx.stroke();
+            ctx.fillStyle = '#e5e9f0';
+            ctx.fillRect(x + 109, bgHeight - 180, 2, 4);
+
+            // Windows (Nord Blue)
+            ctx.fillStyle = 'rgba(136, 192, 208, 0.65)'; 
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 4; c++) {
+                    ctx.fillRect(x + 25 + c * 45, bgHeight - 160 + r * 28, 24, 12);
+                }
+            }
+
+            // Header text
+            ctx.fillStyle = '#88c0d0';
+            ctx.font = 'bold 6px "Press Start 2P"';
+            ctx.fillText("ECE DEPT", x + 75, bgHeight - 168);
+        } else {
+            // --- PLACEMENT CELL / BOARDROOM ---
+            ctx.fillStyle = '#2b303c'; // deep brick
+            ctx.fillRect(x, bgHeight - 200, 260, 200);
+
+            // Pillars on sides
+            ctx.fillStyle = '#434c5e';
+            ctx.fillRect(x, bgHeight - 200, 12, 200);
+            ctx.fillRect(x + 248, bgHeight - 200, 12, 200);
+
+            // Big Glass Window Facade (Amber Glow)
+            ctx.fillStyle = 'rgba(235, 203, 139, 0.18)'; 
+            ctx.fillRect(x + 25, bgHeight - 160, 210, 140);
+
+            // Glass grid overlay
+            ctx.strokeStyle = '#434c5e';
+            ctx.lineWidth = 1.5;
+            for (let wx = x + 25; wx < x + 235; wx += 42) {
+                ctx.beginPath();
+                ctx.moveTo(wx, bgHeight - 160);
+                ctx.lineTo(wx, bgHeight - 20);
+                ctx.stroke();
+            }
+            for (let wy = bgHeight - 160; wy < bgHeight - 20; wy += 35) {
+                ctx.beginPath();
+                ctx.moveTo(x + 25, wy);
+                ctx.lineTo(x + 235, wy);
+                ctx.stroke();
+            }
+
+            // Header Text
+            ctx.fillStyle = '#bf616a';
+            ctx.font = 'bold 6px "Press Start 2P"';
+            ctx.fillText("PLACEMENT CELL", x + 65, bgHeight - 180);
         }
     }
 
-    // Top trim grass line (darker green)
-    ctx.fillStyle = '#2e7d32';
-    ctx.fillRect(0, floorY, canvas.width, 6);
+    ctx.restore();
 }
 
 function drawVivaRoomFloor() {
@@ -1578,7 +1682,7 @@ function drawGame() {
                 const t1x = -bgScroll;
                 const t2x = canvas.width - bgScroll;
                 ctx.drawImage(activeBgImg, t1x, 0, canvas.width, bgHeight);
-                ctx.drawImage(activeBgImg, t2x, 0, canvas.width, bgHeight);
+                ctx.drawImage(activeBgImg, canvas.width - bgScroll, 0, canvas.width, bgHeight);
             } else {
                 // Fallback gradient sky + green grass
                 const grd = ctx.createLinearGradient(0, 0, 0, bgHeight);
@@ -1588,6 +1692,11 @@ function drawGame() {
                 ctx.fillStyle = grd;
                 ctx.fillRect(0, 0, canvas.width, bgHeight);
             }
+
+            // Draw Parallax College Campus Buildings!
+            // We use distance * 12 for a slower, smooth building parallax scrolling
+            const buildingScroll = Math.floor(distance * 12);
+            drawCampusBuildings(ctx, buildingScroll);
 
         } else if (currentLevel === 3) {
             // Draw Level 3 stationary classroom lab backdrop
