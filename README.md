@@ -102,8 +102,6 @@ Open `index.html` in your web browser of choice.
 ### Option B: Local Web Server (Recommended)
 Starting a simple HTTP server ensures correct origin policies for canvas pixel manipulation:
 ```bash
-# Python 3
-python3 -m http.server 8000
 
 
 ```
