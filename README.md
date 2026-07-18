@@ -105,6 +105,5 @@ Starting a simple HTTP server ensures correct origin policies for canvas pixel m
 # Python 3
 python3 -m http.server 8000
 
-# Node.js (via http-server)
-npx http-server . -p 8000
+
 ```
