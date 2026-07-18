@@ -205,6 +205,12 @@ class GameItem {
         if (this.x < -this.width - 20) {
             if (this.type === 'laser' && !this.markedForDeletion) {
                 if (typeof vivaProgress !== 'undefined') {
+                    vivaProgress++;
+                    if (typeof updateHUD === 'function') updateHUD();
+                    if (vivaProgress >= 5 && typeof triggerWin === 'function') {
+                        triggerWin();
+                    }
+                } else if (typeof window.vivaProgress !== 'undefined') {
                     window.vivaProgress++;
                     if (typeof updateHUD === 'function') updateHUD();
                     if (window.vivaProgress >= 5 && typeof triggerWin === 'function') {

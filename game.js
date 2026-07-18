@@ -43,7 +43,7 @@ let distance = 0;
 let commits = 0;
 let collectiblesCount = 0;
 let attendance = 100; // Full attendance — starting fresh!
-let vivaProgress = 0;
+var vivaProgress = 0;
 const distanceLabel = document.getElementById('distance-label');
 let highScore = parseInt(localStorage.getItem('btech_high_score') || '0', 10);
 let notifTimer = 0; // Countdown while notification is shown
@@ -166,10 +166,20 @@ function processSpriteSheet() {
         const imgData = tempCtx.getImageData(0, 0, spriteSheet.width, spriteSheet.height);
         const data = imgData.data;
         for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i+1], b = data[i+2];
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
             // Remove pure white / near-white background pixels
             if (r > 230 && g > 230 && b > 230) {
-                data[i+3] = 0;
+                data[i + 3] = 0;
+            } else {
+                // Lighten skin tones to match fair skin tone requirement
+                if (r > 120 && g > 70 && b > 40 && r > g && g > b && r - b > 30 && r < 220) {
+                    data[i]     = Math.min(255, r + 100);
+                    data[i + 1] = Math.min(255, g + 90);
+                    data[i + 2] = Math.min(255, b + 80);
+                }
             }
         }
         tempCtx.putImageData(imgData, 0, 0);
