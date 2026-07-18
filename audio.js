@@ -307,8 +307,27 @@ class AudioSynth {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
         
+        let activeBassline = this.bassline;
+        let activeMelody = this.melody;
+
+        // Custom high-tempo corporate techno/cyberpunk BGM theme for Level 5
+        if (typeof currentLevel !== 'undefined' && currentLevel === 5) {
+            activeBassline = [
+                110.00, 110.00, 130.81, 130.81, 146.83, 146.83, 164.81, 164.81,
+                110.00, 110.00, 130.81, 130.81, 98.00, 98.00, 164.81, 164.81,
+                110.00, 110.00, 130.81, 130.81, 146.83, 146.83, 164.81, 164.81,
+                164.81, 164.81, 146.83, 146.83, 130.81, 130.81, 98.00, 98.00
+            ];
+            activeMelody = [
+                440.00, 440.00, 523.25, 587.33, 659.25, 659.25, 783.99, 783.99,
+                587.33, 587.33, 523.25, 523.25, 440.00, 440.00, 392.00, 392.00,
+                659.25, 0, 587.33, 0, 523.25, 0, 440.00, 0,
+                392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 0
+            ];
+        }
+
         // 1. Play Soft Bass Note (Triangle wave, lowpassed for warmth)
-        const bassFreq = this.bassline[this.seqIndex % this.bassline.length];
+        const bassFreq = activeBassline[this.seqIndex % activeBassline.length];
         if (bassFreq > 0) {
             const bOsc = this.ctx.createOscillator();
             const bGain = this.ctx.createGain();
@@ -332,7 +351,7 @@ class AudioSynth {
         }
 
         // 2. Play Peaceful Melody Note (Sine wave for ambient music-box styling)
-        const melFreq = this.melody[this.seqIndex % this.melody.length];
+        const melFreq = activeMelody[this.seqIndex % activeMelody.length];
         if (melFreq > 0) {
             const mOsc = this.ctx.createOscillator();
             const mGain = this.ctx.createGain();

@@ -108,6 +108,8 @@ class GameItem {
                 this.width = 32;
                 this.height = 70;
                 this.y = groundY - 10;
+                this.peerIndexX = Math.floor(Math.random() * 4);
+                this.peerIndexY = Math.floor(Math.random() * 2);
                 break;
             case 'wetsign':
                 this.width = 30;
@@ -138,6 +140,24 @@ class GameItem {
                 this.width = 22;
                 this.height = 22;
                 this.y = groundY - 18;
+                break;
+            case 'hr_executive':
+                this.width = 36;
+                this.height = 72;
+                this.y = groundY;
+                this.direction = -1;
+                this.walkRange = 90;
+                this.startX = this.x;
+                break;
+            case 'coffee_spill':
+                this.width = 50;
+                this.height = 15;
+                this.y = groundY + 45;
+                break;
+            case 'flying_test_paper':
+                this.width = 30;
+                this.height = 20;
+                this.y = groundY - 20 - Math.random() * 15;
                 break;
             case 'magnet':
                 this.width = 24;
@@ -180,7 +200,7 @@ class GameItem {
         }
         
         // Sharma walks back and forth
-        if (this.type === 'sharma') {
+        if (this.type === 'sharma' || this.type === 'hr_executive') {
             this.x += this.direction * 1.5;
             if (Math.abs(this.x - this.startX) > this.walkRange) {
                 this.direction *= -1;
@@ -323,27 +343,7 @@ class GameItem {
                 break;
 
             case 'classmate':
-                ctx.fillStyle = '#78909c'; // Blue-grey hoodie
-                ctx.fillRect(this.x + 6, this.y + 16, 20, 28);
-                ctx.fillStyle = '#3f51b5'; // Blue jeans
-                ctx.fillRect(this.x + 8, this.y + 44, 7, 26);
-                ctx.fillRect(this.x + 17, this.y + 44, 7, 26);
-                ctx.fillStyle = '#ffdbb5'; // Skin color
-                ctx.fillRect(this.x + 8, this.y + 2, 16, 14);
-                ctx.fillStyle = '#546e7a'; // Hood outline
-                ctx.fillRect(this.x + 6, this.y, 20, 4);
-                ctx.fillRect(this.x + 6, this.y, 4, 16);
-                ctx.fillRect(this.x + 22, this.y, 4, 16);
-                ctx.fillStyle = '#263238'; // Downcast eyes
-                ctx.fillRect(this.x + 10, this.y + 8, 3, 2);
-                ctx.fillStyle = '#ffdbb5'; // Hands
-                ctx.fillRect(this.x + 18, this.y + 26, 6, 6);
-                ctx.fillStyle = '#00e5ff'; // Glowing cyan screen
-                ctx.fillRect(this.x + 22, this.y + 22, 6, 8);
-                ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
-                ctx.beginPath();
-                ctx.arc(this.x + 25, this.y + 26, 12, 0, Math.PI * 2);
-                ctx.fill();
+                this.drawPeerPixelArt(ctx);
                 break;
 
             case 'wetsign':
@@ -371,18 +371,7 @@ class GameItem {
                 break;
 
             case 'peer':
-                // Draw image if loaded, otherwise fall back to canvas drawing
-                if (isPeerLoaded && transparentPeerCanvas) {
-                    const cellW = transparentPeerCanvas.width / 4;
-                    const cellH = transparentPeerCanvas.height / 2;
-                    ctx.drawImage(
-                        transparentPeerCanvas,
-                        this.peerIndexX * cellW, this.peerIndexY * cellH, cellW, cellH,
-                        this.x, this.y, this.width, this.height
-                    );
-                } else {
-                    this.drawPeerPixelArt(ctx);
-                }
+                this.drawPeerPixelArt(ctx);
                 break;
 
             case 'security':
@@ -522,6 +511,77 @@ class GameItem {
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(this.x + 4, this.y + 4, this.width - 8, this.height - 8);
+                break;
+
+            case 'hr_executive':
+                // Retro HR Executive (suit, trousers, glasses, clipboard)
+                ctx.fillStyle = '#2b303c'; // Dark Charcoal Suit Blazer
+                ctx.fillRect(this.x + 8, this.y + 15, 20, 28);
+                ctx.fillStyle = '#4c566a'; // Cool grey trousers
+                ctx.fillRect(this.x + 8, this.y + 43, 20, 27);
+                ctx.fillStyle = '#ffdbb5'; // Head/Skin
+                ctx.fillRect(this.x + 10, this.y + 2, 16, 14);
+                ctx.fillStyle = '#8fbcbb'; // Tie (Nord Blue-teal)
+                ctx.fillRect(this.x + 17, this.y + 15, 2, 10);
+                
+                // Glasses
+                ctx.strokeStyle = '#2e3440';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(this.x + 12, this.y + 5, 5, 4);
+                ctx.strokeRect(this.x + 19, this.y + 5, 5, 4);
+                ctx.beginPath();
+                ctx.moveTo(this.x + 17, this.y + 7);
+                ctx.lineTo(this.x + 19, this.y + 7);
+                ctx.stroke();
+
+                // Clipboard
+                ctx.fillStyle = '#d08770'; // Wooden Clipboard
+                ctx.fillRect(this.x + 22, this.y + 22, 10, 14);
+                ctx.fillStyle = '#eceff4'; // White sheets of evaluation paper
+                ctx.fillRect(this.x + 23, this.y + 24, 8, 11);
+                ctx.fillStyle = '#4c566a'; // Metallic clip
+                ctx.fillRect(this.x + 25, this.y + 20, 4, 3);
+                break;
+
+            case 'coffee_spill':
+                // Coffee puddle on the carpet
+                ctx.fillStyle = '#5d4037'; // Dark brown coffee base puddle
+                ctx.beginPath();
+                ctx.ellipse(this.x + 25, this.y + 8, 25, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Coffee splash highlights
+                ctx.fillStyle = '#8d6e63'; // Lighter brown highlights
+                ctx.fillRect(this.x + 12, this.y + 5, 5, 2);
+                ctx.fillRect(this.x + 30, this.y + 8, 4, 2);
+
+                // Steam rising effect
+                if (Math.floor(Date.now() / 200) % 2 === 0) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillRect(this.x + 15, this.y - 2, 2, 4);
+                    ctx.fillRect(this.x + 28, this.y - 5, 2, 4);
+                } else {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.fillRect(this.x + 18, this.y - 4, 2, 4);
+                    ctx.fillRect(this.x + 25, this.y - 2, 2, 4);
+                }
+                break;
+
+            case 'flying_test_paper':
+                // Sheets of test papers flying in air
+                ctx.fillStyle = '#eceff4'; // White paper
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeStyle = '#2e3440'; // Thin border
+                ctx.lineWidth = 1;
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+                
+                // Red marks / grades (screaming F!)
+                ctx.fillStyle = '#bf616a'; // Red ink
+                ctx.font = 'bold 5px "Press Start 2P"';
+                ctx.fillText("F", this.x + 6, this.y + 12);
+                ctx.fillRect(this.x + 15, this.y + 4, 10, 2);
+                ctx.fillRect(this.x + 15, this.y + 8, 8, 2);
+                ctx.fillRect(this.x + 15, this.y + 12, 10, 2);
                 break;
 
             case 'magnet':

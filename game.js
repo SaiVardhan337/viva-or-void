@@ -78,6 +78,9 @@ let isGardensBgLoaded = false;
 const campusGreeneryBgImage = new Image();
 let isCampusGreeneryBgLoaded = false;
 
+const corporateHallwayBgImage = new Image();
+let isCorporateHallwayBgLoaded = false;
+
 const peerImage = new Image();
 let isPeerLoaded = false;
 let transparentPeerCanvas = null;
@@ -144,7 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
         preloadImage(cowImage, 'assets/cow.png', () => { isCowImageLoaded = true; processCowImage(); }),
         preloadImage(corridorImage, 'assets/corridor.jpg', () => { isCorridorLoaded = true; }),
         preloadImage(classroomLevel3Image, 'assets/classroom_level3.png', () => { isClassroomLevel3Loaded = true; }),
-        preloadImage(professorImage, 'assets/professor.png', () => { isProfessorLoaded = true; processProfessorImage(); })
+        preloadImage(professorImage, 'assets/professor.png', () => { isProfessorLoaded = true; processProfessorImage(); }),
+        preloadImage(corporateHallwayBgImage, 'assets/corporate_hallway_bg.jpg', () => { isCorporateHallwayBgLoaded = true; })
     ];
 
     Promise.all(preloadPromises).then(() => {
@@ -897,7 +901,9 @@ function spawnItems() {
             if (rand < 0.45) {
                 // Spawning Obstacles
                 let obsType;
-                if (currentLevel === 4) {
+                if (currentLevel === 5) {
+                    obsType = ['hr_executive', 'coffee_spill', 'flying_test_paper'][Math.floor(Math.random() * 3)];
+                } else if (currentLevel === 4) {
                     obsType = ['peer', 'security', 'placement_flyer'][Math.floor(Math.random() * 3)];
                 } else if (currentLevel === 2) {
                     // School / Classroom indoor obstacles (No cars or dogs!)
@@ -910,7 +916,7 @@ function spawnItems() {
             } else if (rand < 0.85) {
                 // Spawning Collectibles
                 let colType;
-                if (currentLevel === 4) {
+                if (currentLevel === 4 || currentLevel === 5) {
                     colType = ['chai', 'resume', 'commit', 'magnet'][Math.floor(Math.random() * 4)];
                 } else if (currentLevel === 2) {
                     // Ensure commits are plentiful in Level 2!
@@ -1163,15 +1169,27 @@ function triggerWin() {
         newNextBtn.style.display = 'block';
         newNextBtn.textContent = '▶ NEXT LEVEL: CORPORATE HALLWAY';
         newNextBtn.addEventListener('click', () => {
-            alert("Great job! Level 5 (Corporate Hallway) is coming soon in the Part 2 release.");
-            // Go back to main menu
+            startLevel5();
+        });
+        celebrationEl.classList.add('hidden');
+        winRestartPrompt.textContent = 'PRESS SPACE TO PLAY LEVEL 4 AGAIN';
+    } else if (currentLevel === 5) {
+        // Level 5 win
+        winTitle.textContent = 'LEVEL 5 PASSED!';
+        winTitle.setAttribute('data-text', 'LEVEL 5 PASSED!');
+        winSubtitle.textContent = '🏃 Arrived at the Boardroom door!';
+        winMessage.textContent = '"Incredible running! You navigated the corporate office blocks. Next up: face the Technical Interview Boss Fight! 💼"';
+        newNextBtn.style.display = 'block';
+        newNextBtn.textContent = '▶ NEXT LEVEL: TECHNICAL INTERVIEW';
+        newNextBtn.addEventListener('click', () => {
+            alert("Outstanding job! Level 6 (Technical Interview Boss Fight) is coming soon in the next update.");
             gameState = 'MENU';
             document.getElementById('win-screen').classList.add('hidden');
             menuScreen.classList.remove('hidden');
             if (pauseToggleBtn) pauseToggleBtn.style.display = 'none';
         });
         celebrationEl.classList.add('hidden');
-        winRestartPrompt.textContent = 'PRESS SPACE TO PLAY LEVEL 4 AGAIN';
+        winRestartPrompt.textContent = 'PRESS SPACE TO PLAY LEVEL 5 AGAIN';
     } else if (currentLevel === 2) {
         // Level 2 win
         winTitle.textContent = 'LEVEL 2 PASSED!';
@@ -1288,22 +1306,20 @@ function updateGame() {
         gameSpeed = Math.min(maxSpeed, baseSpeed + (distance * 0.005)) + boostExtra;
     }
 
-    // Win check — Level 1 ends at 1000m, Level 2 ends at 250m, Level 3 ends at 300m, Level 4 ends at 1000m
+    // Win check — Level 1 ends at 1000m, Level 2 ends at 250m, Level 3 ends at 300m, Level 4/5 ends at 500m
     let winDistance = 1000;
     if (currentLevel === 2) winDistance = 250;
     else if (currentLevel === 3) winDistance = 300;
-    else if (currentLevel === 4) winDistance = 500;
+    else if (currentLevel === 4 || currentLevel === 5) winDistance = 500;
 
-    if (distance >= winDistance) {
-        distance = winDistance;
+    if (distance >= winDistance && gameState === 'PLAYING') {
         triggerWin();
         return;
     }
 
     // --- WhatsApp Notification Milestones ---
-    // (Only triggers for Level 1 at 500m and Level 2 at 250m)
-    const milestoneTarget = currentLevel === 2 ? 250 : (currentLevel === 3 ? -1 : 500);
-    if (milestoneTarget !== -1 && distance >= nextNotifAt && nextNotifAt <= milestoneTarget && currentLevel !== 4) {
+    const milestoneTarget = (currentLevel === 2) ? 250 : (currentLevel === 3 ? -1 : 500);
+    if (milestoneTarget !== -1 && distance >= nextNotifAt && nextNotifAt <= milestoneTarget && currentLevel !== 4 && currentLevel !== 5) {
         triggerNotification(nextNotifAt);
         nextNotifAt += 1000; // prevent re-triggering
         return;
@@ -1387,9 +1403,11 @@ function drawRoad() {
         for (let x = -dashW - gap; x < canvas.width + dashW; x += dashW + gap) {
             ctx.fillRect(x - roadCycle, player.groundY + 86, dashW, 4);
         }
-    } else if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4) {
-        // --- LEVEL 2, 3 & 4 FLOOR ---
-        if (currentLevel === 4) {
+    } else if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5) {
+        // --- LEVEL 2, 3, 4 & 5 FLOOR ---
+        if (currentLevel === 5) {
+            drawCorporateFloor();
+        } else if (currentLevel === 4) {
             drawGardensFloor();
         } else if (currentLevel === 3) {
             drawVivaRoomFloor();
@@ -1516,6 +1534,38 @@ function drawGardensFloor() {
     }
 }
 
+function drawCorporateFloor() {
+    const floorY = player.groundY; // 260
+    const floorH = 140; // up to 400
+
+    // Smooth grey-blue carpet road
+    ctx.fillStyle = '#4c566a'; // Nord dark blue-grey carpet
+    ctx.fillRect(0, floorY, canvas.width, floorH);
+
+    // Metal baseboards (top and bottom borders)
+    ctx.fillStyle = '#d8dee9'; // steel light grey baseboard
+    ctx.fillRect(0, floorY, canvas.width, 8); // top trim
+    ctx.fillRect(0, floorY + floorH - 12, canvas.width, 12); // bottom trim
+
+    // Soft reflective floor lines (low contrast)
+    ctx.strokeStyle = '#434c5e';
+    ctx.lineWidth = 1.5;
+    const tileW = 40;
+    const cycle = groundOffset % tileW;
+
+    ctx.beginPath();
+    for (let x = -tileW; x < canvas.width + tileW; x += tileW) {
+        ctx.moveTo(x - cycle, floorY + 8);
+        ctx.lineTo(x - cycle, floorY + floorH - 12);
+    }
+    ctx.stroke();
+
+    // Dark grey border lines
+    ctx.fillStyle = '#3b4252';
+    ctx.fillRect(0, floorY + 6, canvas.width, 2);
+    ctx.fillRect(0, floorY + floorH - 14, canvas.width, 2);
+}
+
 function drawVivaRoomFloor() {
     const floorY = player.groundY; // 260
     const floorH = 140; // up to 400
@@ -1556,17 +1606,31 @@ function drawVivaRoomFloor() {
 
 function drawGame() {
     // Clear canvas with base background color
-    ctx.fillStyle = (currentLevel === 2 || currentLevel === 3) ? '#d8dee9' : '#7ac2f0';
+    ctx.fillStyle = (currentLevel === 2 || currentLevel === 3 || currentLevel === 5) ? '#d8dee9' : '#7ac2f0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4) {
-        // --- LEVEL 2, 3 & 4 INDOOR/GARDENS BACKDROP RENDER ---
+    if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5) {
+        // --- LEVEL 2, 3, 4 & 5 INDOOR/GARDENS BACKDROP RENDER ---
         ctx.save();
         ctx.imageSmoothingEnabled = false;
 
         const bgHeight = player.groundY + 10; // 270px
         
-        if (currentLevel === 4) {
+        if (currentLevel === 5) {
+            // Draw Level 5 scrolling corporate hallway backdrop
+            const bgScroll = (distance * 20) % canvas.width;
+            if (isCorporateHallwayBgLoaded) {
+                ctx.drawImage(corporateHallwayBgImage, -bgScroll, 0, canvas.width, bgHeight);
+                ctx.drawImage(corporateHallwayBgImage, canvas.width - bgScroll, 0, canvas.width, bgHeight);
+            } else {
+                // Fallback office wall gradient
+                const grd = ctx.createLinearGradient(0, 0, 0, bgHeight);
+                grd.addColorStop(0, '#eceff1');
+                grd.addColorStop(1, '#b0bec5');
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, canvas.width, bgHeight);
+            }
+        } else if (currentLevel === 4) {
             // Draw Level 4 scrolling backdrop - switches at 250m
             const bgScroll = (distance * 20) % canvas.width;
             const useSecondBg = distance >= 250;
@@ -1704,8 +1768,10 @@ window.addEventListener('keydown', (e) => {
             } else if (currentLevel === 2) {
                 startLevel3();
             } else if (currentLevel === 4) {
-                // Play Level 4 again in Part 2
-                initGame(4);
+                startLevel5();
+            } else if (currentLevel === 5) {
+                // Play Level 5 again
+                initGame(5);
                 gameState = 'PLAYING';
                 document.getElementById('win-screen').classList.add('hidden');
                 hudElement.classList.remove('hidden');
@@ -1843,6 +1909,17 @@ function startLevel3() {
     if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
     
     initGame(3);
+    synth.startBGM();
+}
+
+function startLevel5() {
+    gameState = 'PLAYING';
+    document.getElementById('win-screen').classList.add('hidden');
+    document.getElementById('notif-popup').classList.add('hidden');
+    hudElement.classList.remove('hidden');
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
+    
+    initGame(5);
     synth.startBGM();
 }
 
