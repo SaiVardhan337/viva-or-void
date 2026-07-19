@@ -14,6 +14,17 @@ const VIVA_QA = [
     { q: "Local storage key?", a: "localStorage" }
 ];
 
+const INTERVIEW_QA = [
+    { q: "Worst QuickSort complexity?", a: "O(N^2)" },
+    { q: "Filters SQL grouped rows?", a: "HAVING" },
+    { q: "Connection-oriented protocol?", a: "TCP" },
+    { q: "O(1) average lookup map?", a: "HashMap" },
+    { q: "Deadlock circular condition?", a: "Circular Wait" },
+    { q: "Hiding complexity process?", a: "Encapsulation" },
+    { q: "LIFO queue structure?", a: "Stack" },
+    { q: "Binds code and data?", a: "Class" }
+];
+
 // --- Obstacles & Collectibles Definition ---
 class GameItem {
     constructor(type, x, y, speedMult = 1, extra = null) {
@@ -170,8 +181,9 @@ class GameItem {
                 this.isHigh = Math.random() < 0.5;
                 this.y = this.isHigh ? groundY - 15 : groundY + 30;
                 
-                const qaIndex = Math.floor(Math.random() * VIVA_QA.length);
-                this.qaPair = VIVA_QA[qaIndex];
+                const qaList = (typeof currentLevel !== 'undefined' && currentLevel === 6) ? INTERVIEW_QA : VIVA_QA;
+                const qaIndex = Math.floor(Math.random() * qaList.length);
+                this.qaPair = qaList[qaIndex];
                 this.questionText = this.qaPair.q;
                 this.laserColor = this.isHigh ? '#ff0055' : '#00ffcc';
                 break;
@@ -225,17 +237,27 @@ class GameItem {
 
         if (this.x < -this.width - 20) {
             if (this.type === 'laser' && !this.markedForDeletion) {
-                if (typeof vivaProgress !== 'undefined') {
-                    vivaProgress++;
-                    if (typeof updateHUD === 'function') updateHUD();
-                    if (vivaProgress >= 5 && typeof triggerWin === 'function') {
-                        triggerWin();
+                if (typeof currentLevel !== 'undefined' && currentLevel === 6) {
+                    if (typeof interviewProgress !== 'undefined') {
+                        interviewProgress++;
+                        if (typeof updateHUD === 'function') updateHUD();
+                        if (interviewProgress >= 5 && typeof triggerWin === 'function') {
+                            triggerWin();
+                        }
                     }
-                } else if (typeof window.vivaProgress !== 'undefined') {
-                    window.vivaProgress++;
-                    if (typeof updateHUD === 'function') updateHUD();
-                    if (window.vivaProgress >= 5 && typeof triggerWin === 'function') {
-                        triggerWin();
+                } else {
+                    if (typeof vivaProgress !== 'undefined') {
+                        vivaProgress++;
+                        if (typeof updateHUD === 'function') updateHUD();
+                        if (vivaProgress >= 5 && typeof triggerWin === 'function') {
+                            triggerWin();
+                        }
+                    } else if (typeof window.vivaProgress !== 'undefined') {
+                        window.vivaProgress++;
+                        if (typeof updateHUD === 'function') updateHUD();
+                        if (window.vivaProgress >= 5 && typeof triggerWin === 'function') {
+                            triggerWin();
+                        }
                     }
                 }
             }

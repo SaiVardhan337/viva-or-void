@@ -326,6 +326,22 @@ class AudioSynth {
             ];
         }
 
+        // Custom epic high-stakes battle theme for Level 6 (The Finale)
+        if (typeof currentLevel !== 'undefined' && currentLevel === 6) {
+            activeBassline = [
+                110.00, 110.00, 110.00, 110.00, 130.81, 130.81, 130.81, 130.81,
+                146.83, 146.83, 146.83, 146.83, 164.81, 164.81, 164.81, 164.81,
+                110.00, 110.00, 110.00, 110.00, 98.00, 98.00, 98.00, 98.00,
+                87.31, 87.31, 87.31, 87.31, 73.42, 73.42, 82.41, 82.41
+            ];
+            activeMelody = [
+                440.00, 0, 440.00, 523.25, 587.33, 0, 587.33, 659.25,
+                783.99, 0, 783.99, 880.00, 987.77, 880.00, 783.99, 659.25,
+                587.33, 0, 523.25, 0, 440.00, 0, 392.00, 0,
+                349.23, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00
+            ];
+        }
+
         // 1. Play Soft Bass Note (Triangle wave, lowpassed for warmth)
         const bassFreq = activeBassline[this.seqIndex % activeBassline.length];
         if (bassFreq > 0) {

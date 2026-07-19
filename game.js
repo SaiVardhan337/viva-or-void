@@ -44,6 +44,7 @@ let commits = 0;
 let collectiblesCount = 0;
 let attendance = 100; // Full attendance — starting fresh!
 var vivaProgress = 0;
+var interviewProgress = 0;
 const distanceLabel = document.getElementById('distance-label');
 let highScore = parseInt(localStorage.getItem('btech_high_score') || '0', 10);
 let notifTimer = 0; // Countdown while notification is shown
@@ -101,6 +102,13 @@ const hrExecutiveImage = new Image();
 let isHRExecutiveLoaded = false;
 let transparentHRExecutiveCanvas = null;
 
+const boardroomBossBgImage = new Image();
+let isBoardroomBossBgLoaded = false;
+
+const interviewerBossImage = new Image();
+let isInterviewerBossLoaded = false;
+let transparentInterviewerBossCanvas = null;
+
 const dogImage = new Image();
 let isDogImageLoaded = false;
 let transparentDogCanvas = null;
@@ -153,7 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
         preloadImage(classroomLevel3Image, 'assets/classroom_level3.png', () => { isClassroomLevel3Loaded = true; }),
         preloadImage(professorImage, 'assets/professor.png', () => { isProfessorLoaded = true; processProfessorImage(); }),
         preloadImage(corporateHallwayBgImage, 'assets/corporate_hallway_bg.jpg', () => { isCorporateHallwayBgLoaded = true; }),
-        preloadImage(hrExecutiveImage, 'assets/hr_executive.jpg', () => { isHRExecutiveLoaded = true; processHRExecutiveImage(); })
+        preloadImage(hrExecutiveImage, 'assets/hr_executive.jpg', () => { isHRExecutiveLoaded = true; processHRExecutiveImage(); }),
+        preloadImage(boardroomBossBgImage, 'assets/boardroom_boss_bg.jpg', () => { isBoardroomBossBgLoaded = true; }),
+        preloadImage(interviewerBossImage, 'assets/interviewer_boss.jpg', () => { isInterviewerBossLoaded = true; processInterviewerBossImage(); })
     ];
 
     Promise.all(preloadPromises).then(() => {
@@ -294,6 +304,25 @@ function processHRExecutiveImage() {
     } catch (e) {
         console.warn("Local CORS security policy blocked HR executive image manipulation. Using raw image.", e);
         tempCtx.drawImage(hrExecutiveImage, 0, 0);
+    }
+}
+
+function processInterviewerBossImage() {
+    transparentInterviewerBossCanvas = document.createElement('canvas');
+    transparentInterviewerBossCanvas.width = interviewerBossImage.width;
+    transparentInterviewerBossCanvas.height = interviewerBossImage.height;
+    const tempCtx = transparentInterviewerBossCanvas.getContext('2d');
+    tempCtx.drawImage(interviewerBossImage, 0, 0);
+    try {
+        const imgData = tempCtx.getImageData(0, 0, interviewerBossImage.width, interviewerBossImage.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) data[i + 3] = 0;
+        }
+        tempCtx.putImageData(imgData, 0, 0);
+    } catch (e) {
+        console.warn("Local CORS security policy blocked interviewer boss image manipulation. Using raw image.", e);
+        tempCtx.drawImage(interviewerBossImage, 0, 0);
     }
 }
 
@@ -904,7 +933,42 @@ function spawnItems() {
         const rand = Math.random();
         let newItem;
         
-        if (currentLevel === 3) {
+        if (currentLevel === 6) {
+            // Level 6 Boss Fight: Spawn paired laser question and two answers (one correct, one incorrect) from INTERVIEW_QA
+            if (typeof INTERVIEW_QA === 'undefined') return;
+            const qaIndex = Math.floor(Math.random() * INTERVIEW_QA.length);
+            const pair = INTERVIEW_QA[qaIndex];
+            
+            const laserItem = acquireItem('laser', canvas.width - 160, 0, 1.4);
+            laserItem.qaPair = pair;
+            laserItem.questionText = pair.q;
+            
+            // Get a wrong answer
+            let wrongA = "O(1)";
+            const otherQAs = INTERVIEW_QA.filter(x => x.a !== pair.a);
+            if (otherQAs.length > 0) {
+                wrongA = otherQAs[Math.floor(Math.random() * otherQAs.length)].a;
+            }
+            
+            // Alternate vertical heights for answer bubbles
+            const spawnCorrectFirst = Math.random() < 0.5;
+            const ans1Text = spawnCorrectFirst ? pair.a : wrongA;
+            const ans2Text = spawnCorrectFirst ? wrongA : pair.a;
+
+            const ans1Y = player.groundY - 50;
+            const ans2Y = player.groundY - 110;
+
+            const answer1 = acquireItem('answer', canvas.width + 50, ans1Y, 1.1, ans1Text);
+            const answer2 = acquireItem('answer', canvas.width + 120, ans2Y, 1.1, ans2Text);
+            
+            items.push(laserItem);
+            items.push(answer1);
+            items.push(answer2);
+            
+            // Random interval between boss attacks
+            itemSpawnTimer = 130 + Math.random() * 60;
+            return;
+        } else if (currentLevel === 3) {
             // Spawn paired laser question (from boss) and answer bubble (from right)
             const qaIndex = Math.floor(Math.random() * VIVA_QA.length);
             const pair = VIVA_QA[qaIndex];
@@ -1005,7 +1069,8 @@ function initGame(level = 1) {
     collectiblesCount = 0;
     attendance = 100; // Full 100% — fresh start!
     vivaProgress = 0;
-    gameSpeed = level === 3 ? 0 : baseSpeed;
+    interviewProgress = 0;
+    gameSpeed = (level === 3 || level === 6) ? 0 : baseSpeed;
     itemSpawnTimer = 30;
     invincibilityTimer = 0;
     magnetTimer = 0;
@@ -1013,7 +1078,7 @@ function initGame(level = 1) {
     groundOffset = 0;
     notifTimer = 0;
     notifMilestone = 0;
-    nextNotifAt = (level === 2 || level === 5) ? 250 : 500;
+    nextNotifAt = (level === 2 || level === 5 || level === 6) ? 250 : 500;
 
     updateHUD();
 }
@@ -1023,6 +1088,9 @@ function updateHUD() {
     if (currentLevel === 3) {
         if (distanceLabel) distanceLabel.textContent = 'VIVA PROG:';
         distanceVal.textContent = vivaProgress + ' / 5';
+    } else if (currentLevel === 6) {
+        if (distanceLabel) distanceLabel.textContent = 'INTERVIEW PROG:';
+        distanceVal.textContent = interviewProgress + ' / 5';
     } else {
         if (distanceLabel) distanceLabel.textContent = 'DISTANCE:';
         distanceVal.textContent = Math.floor(distance) + 'm';
@@ -1114,21 +1182,38 @@ function handleCollisions() {
                     magnetTimer = 360; // 6 seconds
                     spawnCollectSparks(item.x + 10, item.y + 10, '#ff8f3b');
                 } else if (item.type === 'answer') {
-                    // Answer bubble picked up! Recover 10% attendance and add 5 commits
-                    attendance = Math.min(100, attendance + 10.0);
-                    commits += 5;
-                    vivaProgress++;
-                    spawnCollectSparks(item.x + item.width/2, item.y + item.height/2, '#a3be8c');
-                    
-                    // Answering destroys the oldest active laser beam on screen!
                     const activeLaser = items.find(it => it.type === 'laser' && !it.markedForDeletion);
-                    if (activeLaser) {
-                        activeLaser.markedForDeletion = true;
-                        spawnCollectSparks(activeLaser.x + activeLaser.width/2, activeLaser.y + activeLaser.height/2, '#00ffcc');
-                    }
-                    
-                    if (vivaProgress >= 5) {
-                        triggerWin();
+                    if (currentLevel === 6) {
+                        if (activeLaser && activeLaser.qaPair && item.answerText === activeLaser.qaPair.a) {
+                            attendance = Math.min(100, attendance + 10.0);
+                            commits += 5;
+                            interviewProgress++;
+                            spawnCollectSparks(item.x + item.width/2, item.y + item.height/2, '#a3be8c');
+                            activeLaser.markedForDeletion = true;
+                            spawnCollectSparks(activeLaser.x + activeLaser.width/2, activeLaser.y + activeLaser.height/2, '#00ffcc');
+                            if (interviewProgress >= 5) {
+                                triggerWin();
+                            }
+                        } else {
+                            attendance = Math.max(0, attendance - 15.0);
+                            spawnCollectSparks(item.x + item.width/2, item.y + item.height/2, '#bf616a');
+                            synth.playHit();
+                            if (attendance < 50.0) {
+                                triggerGameOver();
+                            }
+                        }
+                    } else {
+                        attendance = Math.min(100, attendance + 10.0);
+                        commits += 5;
+                        vivaProgress++;
+                        spawnCollectSparks(item.x + item.width/2, item.y + item.height/2, '#a3be8c');
+                        if (activeLaser) {
+                            activeLaser.markedForDeletion = true;
+                            spawnCollectSparks(activeLaser.x + activeLaser.width/2, activeLaser.y + activeLaser.height/2, '#00ffcc');
+                        }
+                        if (vivaProgress >= 5) {
+                            triggerWin();
+                        }
                     }
                 }
                 updateHUD();
@@ -1206,14 +1291,24 @@ function triggerWin() {
         newNextBtn.style.display = 'block';
         newNextBtn.textContent = '▶ NEXT LEVEL: TECHNICAL INTERVIEW';
         newNextBtn.addEventListener('click', () => {
-            alert("Outstanding job! Level 6 (Technical Interview Boss Fight) is coming soon in the next update.");
-            gameState = 'MENU';
-            document.getElementById('win-screen').classList.add('hidden');
-            menuScreen.classList.remove('hidden');
-            if (pauseToggleBtn) pauseToggleBtn.style.display = 'none';
+            startLevel6();
         });
         celebrationEl.classList.add('hidden');
         winRestartPrompt.textContent = 'PRESS SPACE TO PLAY LEVEL 5 AGAIN';
+    } else if (currentLevel === 6) {
+        // Level 6 win: campaign graduation complete!
+        let grade = 'Placed';
+        if (attendance >= 90) grade = 'Placed (Dream Offer / Star Recruiter!)';
+        else if (attendance >= 75) grade = 'Placed (Super Dream Offer)';
+        else grade = 'Placed (Regular Offer)';
+
+        winTitle.textContent = 'CAMPUS PLACED!';
+        winTitle.setAttribute('data-text', 'CAMPUS PLACED!');
+        winSubtitle.textContent = '🎉 STATUS: ' + grade + ' 🎉';
+        winMessage.textContent = '"Incredible! You answered every technical question, survived the pressure of the placement drive, and secured your dream job offer! You have completed the B.Tech Odyssey! 🏆🎓"';
+        newNextBtn.style.display = 'none';
+        celebrationEl.classList.remove('hidden');
+        winRestartPrompt.textContent = 'PRESS SPACE TO PLAY AGAIN FROM LEVEL 1';
     } else if (currentLevel === 2) {
         // Level 2 win
         winTitle.textContent = 'LEVEL 2 PASSED!';
@@ -1428,9 +1523,11 @@ function drawRoad() {
         for (let x = -dashW - gap; x < canvas.width + dashW; x += dashW + gap) {
             ctx.fillRect(x - roadCycle, player.groundY + 86, dashW, 4);
         }
-    } else if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5) {
-        // --- LEVEL 2, 3, 4 & 5 FLOOR ---
-        if (currentLevel === 5) {
+    } else if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5 || currentLevel === 6) {
+        // --- LEVEL 2, 3, 4, 5 & 6 FLOOR ---
+        if (currentLevel === 6) {
+            drawBoardroomFloor();
+        } else if (currentLevel === 5) {
             drawCorporateFloor();
         } else if (currentLevel === 4) {
             drawGardensFloor();
@@ -1591,6 +1688,31 @@ function drawCorporateFloor() {
     ctx.fillRect(0, floorY + floorH - 14, canvas.width, 2);
 }
 
+function drawBoardroomFloor() {
+    const floorY = player.groundY; // 260
+    const floorH = 140; // up to 400
+
+    // Clean lab marble tile floor (light grey-teal)
+    ctx.fillStyle = '#eceff4';
+    ctx.fillRect(0, floorY, canvas.width, floorH);
+
+    // Checkerboard floor grid pattern (Nord grey theme)
+    const tileSize = 35;
+    const cycle = groundOffset % (tileSize * 2);
+
+    for (let row = 0; row < Math.ceil(floorH / tileSize); row++) {
+        for (let col = -2; col < Math.ceil(canvas.width / tileSize) + 2; col++) {
+            const isDark = (row + col) % 2 === 0;
+            ctx.fillStyle = isDark ? '#eceff4' : '#e5e9f0';
+            ctx.fillRect(col * tileSize - cycle, floorY + row * tileSize, tileSize, tileSize);
+        }
+    }
+
+    // Top trim lab floor baseboard
+    ctx.fillStyle = '#4c566a';
+    ctx.fillRect(0, floorY, canvas.width, 6);
+}
+
 function drawVivaRoomFloor() {
     const floorY = player.groundY; // 260
     const floorH = 140; // up to 400
@@ -1631,17 +1753,55 @@ function drawVivaRoomFloor() {
 
 function drawGame() {
     // Clear canvas with base background color
-    ctx.fillStyle = (currentLevel === 2 || currentLevel === 3 || currentLevel === 5) ? '#d8dee9' : '#7ac2f0';
+    ctx.fillStyle = (currentLevel === 2 || currentLevel === 3 || currentLevel === 5 || currentLevel === 6) ? '#d8dee9' : '#7ac2f0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5) {
-        // --- LEVEL 2, 3, 4 & 5 INDOOR/GARDENS BACKDROP RENDER ---
+    if (currentLevel === 2 || currentLevel === 3 || currentLevel === 4 || currentLevel === 5 || currentLevel === 6) {
+        // --- LEVEL 2, 3, 4, 5 & 6 INDOOR/GARDENS BACKDROP RENDER ---
         ctx.save();
         ctx.imageSmoothingEnabled = false;
 
         const bgHeight = player.groundY + 10; // 270px
         
-        if (currentLevel === 5) {
+        if (currentLevel === 6) {
+            // Draw Level 6 placement lab backdrop (stationary or very slow scroll)
+            if (isBoardroomBossBgLoaded) {
+                ctx.drawImage(boardroomBossBgImage, 0, 0, canvas.width, bgHeight);
+            } else {
+                ctx.fillStyle = '#1f232a';
+                ctx.fillRect(0, 0, canvas.width, bgHeight);
+            }
+
+            // Draw Interviewer Boss floating on the right
+            const bossFloat = Math.sin(Date.now() / 250) * 8;
+            const bossX = canvas.width - 150;
+            const bossY = player.groundY - 100 + bossFloat;
+
+            if (isInterviewerBossLoaded && transparentInterviewerBossCanvas) {
+                ctx.save();
+                // Flip horizontally so the interviewer boss faces the player on the left
+                ctx.translate(bossX + 110, bossY);
+                ctx.scale(-1, 1);
+                ctx.drawImage(transparentInterviewerBossCanvas, 0, 0, 110, 110);
+                ctx.restore();
+            } else {
+                // Fallback boss drawing
+                ctx.fillStyle = '#4c566a';
+                ctx.fillRect(bossX + 30, bossY + 40, 40, 50);
+                ctx.fillStyle = '#ffdbb5';
+                ctx.fillRect(bossX + 40, bossY + 10, 20, 30);
+            }
+
+            // Draw a subtle neon glow border
+            ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(bossX, bossY, 110, 110);
+
+            // Boss label
+            ctx.fillStyle = '#ff0055';
+            ctx.font = '5px "Press Start 2P"';
+            ctx.fillText("THE INTERVIEWER", bossX + 8, bossY - 8);
+        } else if (currentLevel === 5) {
             // Draw Level 5 scrolling corporate hallway backdrop
             const bgScroll = (distance * 20) % canvas.width;
             if (isCorporateHallwayBgLoaded) {
@@ -1795,8 +1955,10 @@ window.addEventListener('keydown', (e) => {
             } else if (currentLevel === 4) {
                 startLevel5();
             } else if (currentLevel === 5) {
-                // Play Level 5 again
-                initGame(5);
+                startLevel6();
+            } else if (currentLevel === 6) {
+                // Play Level 6 again
+                initGame(6);
                 gameState = 'PLAYING';
                 document.getElementById('win-screen').classList.add('hidden');
                 hudElement.classList.remove('hidden');
@@ -1945,6 +2107,17 @@ function startLevel5() {
     if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
     
     initGame(5);
+    synth.startBGM();
+}
+
+function startLevel6() {
+    gameState = 'PLAYING';
+    document.getElementById('win-screen').classList.add('hidden');
+    document.getElementById('notif-popup').classList.add('hidden');
+    hudElement.classList.remove('hidden');
+    if (pauseToggleBtn) pauseToggleBtn.style.display = 'block';
+    
+    initGame(6);
     synth.startBGM();
 }
 
